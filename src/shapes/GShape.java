@@ -58,6 +58,14 @@ public abstract  class GShape {
 		this.bSelected = false;
 		this.eSelectedAnchor = null;
 	}
+	//Getter and Setter
+	public AffineTransform getAffineTransform() {
+		return this.affineTransform;
+	}
+	
+	public Shape getTransformedShape() {
+		return this.affineTransform.createTransformedShape(this.shape);
+	}
 	
 	protected Shape getShape() {
 		return this.shape;
@@ -73,6 +81,10 @@ public abstract  class GShape {
 	
 	public EAnchor getESeletedAnchor() {
 		return this.eSelectedAnchor;
+	}
+	
+	public Rectangle getBounds() {
+		return this.shape.getBounds();
 	}
 	
 	//methods
@@ -138,6 +150,10 @@ public abstract  class GShape {
 	    return false;
 	}
 	
+	public boolean contains(GShape shape) {
+		return this.shape.contains(shape.getShape().getBounds());
+	}
+	
 	//translation
 	public void setMovePoint(int x, int y) {
 			this.px = x;
@@ -154,82 +170,7 @@ public abstract  class GShape {
 			this.py = y;
 	}
 	
-	//resize
-	public void setResizePoint(int x, int y) {
-		this.px = x;
-		this.py = y;
-	}
-	
-	public void resizePoint(int x, int y) {
-	    EAnchor anchor = this.eSelectedAnchor;
-	    Rectangle bounds = this.shape.getBounds();
-
-	    double refX = 0, refY = 0;
-	    
-	    switch(anchor) {
-	        case eSE: refX = bounds.x; refY = bounds.y; break;
-	        case eSW: refX = bounds.x + bounds.width; refY = bounds.y; break;
-	        case eNE: refX = bounds.x; refY = bounds.y + bounds.height; break;
-	        case eNW: refX = bounds.x + bounds.width; refY = bounds.y + bounds.height; break;
-	        case eNN: refX = bounds.x + bounds.width/2; refY = bounds.y + bounds.height; break;
-	        case eSS: refX = bounds.x + bounds.width/2; refY = bounds.y; break;
-	        case eEE: refX = bounds.x; refY = bounds.y + bounds.height/2; break;
-	        case eWW: refX = bounds.x + bounds.width; refY = bounds.y + bounds.height/2; break;
-	        default: return; 
-	    }
-	    
-	    double newWidth = bounds.width;
-	    double newHeight = bounds.height;
-	    
-	    switch(anchor) {
-	        case eSE: 
-	            newWidth = x - bounds.x;
-	            newHeight = y - bounds.y;
-	            break;
-	        case eSW: 
-	            newWidth = (bounds.x + bounds.width) - x;
-	            newHeight = y - bounds.y;
-	            break;
-	        case eNE: 
-	            newWidth = x - bounds.x;
-	            newHeight = (bounds.y + bounds.height) - y;
-	            break;
-	        case eNW: 
-	            newWidth = (bounds.x + bounds.width) - x;
-	            newHeight = (bounds.y + bounds.height) - y;
-	            break;
-	        case eNN: 
-	            newHeight = (bounds.y + bounds.height) - y;
-	            break;
-	        case eSS: 
-	            newHeight = y - bounds.y;
-	            break;
-	        case eEE: 
-	            newWidth = x - bounds.x;
-	            break;
-	        case eWW:
-	            newWidth = (bounds.x + bounds.width) - x;
-	            break;
-	    }
-	    
-	    newWidth = Math.max(newWidth, 1);
-	    newHeight = Math.max(newHeight, 1);
-
-	    double scaleX = newWidth / bounds.width;
-	    double scaleY = newHeight / bounds.height;
-
-	    AffineTransform at = new AffineTransform();
-	    at.translate(refX, refY);
-	    at.scale(scaleX, scaleY);
-	    at.translate(-refX, -refY);
-
-	    this.affineTransform = at;
-	    
-	    this.px = x;
-	    this.py = y;
-	}
-	
-	//draw함수
+	//draw method
 	public abstract void setPoint(int x, int y);
 	public abstract void addPoint(int x, int y);
 	public abstract void dragPoint(int x, int y);

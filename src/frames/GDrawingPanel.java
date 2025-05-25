@@ -81,39 +81,27 @@ public class GDrawingPanel extends JPanel {
     }
     
     private void startTransform(int x, int y) {
-        //set shape
-        this.currentShape = eShapeTool.newShape();
-        this.shapes.add(this.currentShape);
-        
-        if (this.eShapeTool == EShapeTool.eSelect) {
-            GShape clickedShape = onShape(x,y);
-            if(clickedShape == null) {
-                this.transformer = new GDrawer(this.currentShape);
-                for(GShape shape: this.shapes) {
-                    shape.setSelected(false);
-                }
-                this.selectedShape = null;
-            } else {
-                this.selectedShape = clickedShape;
-                this.selectedShape.setSelected(true);
-                
-                EAnchor anchor = this.selectedShape.getESeletedAnchor();
-                if(anchor == EAnchor.eMM) {
-                    this.transformer = new GMover(this.selectedShape);
-                } else {
-                    this.transformer = new GResizer(this.selectedShape);
-                }
-            }
-        } else {
-            for(GShape shape: this.shapes) {
-                shape.setSelected(false);
-            }
-            this.selectedShape = null;
-            this.transformer = new GDrawer(this.currentShape);
-        }
-        
-        this.transformer.start((Graphics2D) getGraphics(), x, y);
-    }
+		//set shape
+		this.currentShape = eShapeTool.newShape();
+		this.shapes.add(this.currentShape);
+		
+		if (this.eShapeTool == EShapeTool.eSelect) {
+			this.selectedShape = onShape(x,y);
+			if(this.selectedShape == null) {
+				this.transformer = new GDrawer(this.currentShape);
+			} else if(this.selectedShape.getESeletedAnchor() == EAnchor.eMM){
+				this.transformer = new GMover(this.selectedShape);
+			} else if(this.selectedShape.getESeletedAnchor() == EAnchor.eRR){
+				this.transformer = new GMover(this.selectedShape);
+				//추후에 rotater로 바껴야 함
+			} else {
+				this.transformer = new GResizer(this.selectedShape);
+			}
+		} else {
+			this.transformer = new GDrawer(this.currentShape);
+		}
+		this.transformer.start((Graphics2D) getGraphics(), x, y);
+	}
 
 	private void keepTransform(int x, int y) {
 		this.transformer.drag((Graphics2D) getGraphics(), x, y);
@@ -126,14 +114,20 @@ public class GDrawingPanel extends JPanel {
 	}
 	
 	private void finishTransform(int x, int y) {
-	    this.transformer.finish((Graphics2D) getGraphics(), x, y);
-	    
-	    if(this.eShapeTool == EShapeTool.eSelect) {
-	        this.shapes.remove(this.shapes.size()-1);
-	    } else {
-	        this.selectShape(this.currentShape);
-	    }
-	    this.repaint();
+		this.transformer.finish((Graphics2D) getGraphics(), x, y);
+		this.selectShape(this.currentShape);
+		
+		if(this.eShapeTool == EShapeTool.eSelect) {
+			this.shapes.remove(this.shapes.size()-1);
+			for(GShape shape : this.shapes) {
+				if(this.currentShape.contains(shape)) {
+					shape.setSelected(true);
+				} else {
+					shape.setSelected(false);
+				}
+			}
+		}
+		this.repaint();
 	}
 	
 	private void selectShape(GShape shape) {
@@ -147,12 +141,14 @@ public class GDrawingPanel extends JPanel {
 	}
 	
 	private void changeCursor(int x, int y) {
-		this.selectedShape = onShape(x, y);
-		if(this.selectedShape == null) {
-			this.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-		} else{
-			EAnchor eAnchor = this.selectedShape.getESeletedAnchor();
-			this.setCursor(eAnchor.getCursor());
+		if(this.eShapeTool == EShapeTool.eSelect) {
+			this.selectedShape = onShape(x, y);
+			if(this.selectedShape == null) {
+				this.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+			} else{
+				EAnchor eAnchor = this.selectedShape.getESeletedAnchor();
+				this.setCursor(eAnchor.getCursor());
+			}
 		}
 	}
 	
