@@ -17,6 +17,7 @@ import shapes.GShape.EPoints;
 import transformers.GDrawer;
 import transformers.GMover;
 import transformers.GResizer;
+import transformers.GRotater;
 import transformers.GTransformer;
 
 public class GDrawingPanel extends JPanel {
@@ -92,8 +93,7 @@ public class GDrawingPanel extends JPanel {
 			} else if(this.selectedShape.getESeletedAnchor() == EAnchor.eMM){
 				this.transformer = new GMover(this.selectedShape);
 			} else if(this.selectedShape.getESeletedAnchor() == EAnchor.eRR){
-				this.transformer = new GMover(this.selectedShape);
-				//추후에 rotater로 바껴야 함
+				this.transformer = new GRotater(this.selectedShape);
 			} else {
 				this.transformer = new GResizer(this.selectedShape);
 			}
