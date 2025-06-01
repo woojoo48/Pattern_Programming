@@ -29,7 +29,9 @@ public class GDrawingPanel extends JPanel {
         eNP
     }
     
+    //저장할때 다 저장하는 것이 아니라 vector만 저장하는 것이 더 효율적
     private Vector<GShape> shapes;
+    
     private GTransformer transformer;
     private GShape currentShape;
     private GShape selectedShape;
@@ -54,6 +56,14 @@ public class GDrawingPanel extends JPanel {
 
     public void initialize() {
         
+    }
+    
+    public Vector<GShape> getShape(){
+    	return this.shapes;
+    }
+    
+    public void setShapes(Vector<GShape> shapes) {
+    	this.shapes = shapes;
     }
     
     public void initialize(String shape) {
@@ -114,21 +124,24 @@ public class GDrawingPanel extends JPanel {
 	}
 	
 	private void finishTransform(int x, int y) {
-		this.transformer.finish((Graphics2D) getGraphics(), x, y);
-		this.selectShape(this.currentShape);
-		
-		if(this.eShapeTool == EShapeTool.eSelect) {
-			this.shapes.remove(this.shapes.size()-1);
-			for(GShape shape : this.shapes) {
-				if(this.currentShape.contains(shape)) {
-					shape.setSelected(true);
-				} else {
-					shape.setSelected(false);
-				}
-			}
+		 this.transformer.finish((Graphics2D) getGraphics(), x, y);
+		    if(this.eShapeTool == EShapeTool.eSelect) {
+		        if(this.selectedShape == null && this.transformer instanceof GDrawer) {
+		            this.shapes.remove(this.shapes.size()-1);
+		            for(GShape shape : this.shapes) {
+		                if(this.currentShape.contains(shape)) {
+		                    shape.setSelected(true);
+		                } else {
+		                    shape.setSelected(false);
+		                }
+		            }
+		        }
+		    } else {
+		        this.selectShape(this.currentShape);
+		    }
+		    
+		    this.repaint();
 		}
-		this.repaint();
-	}
 	
 	private void selectShape(GShape shape) {
 	    for(GShape otherShape: this.shapes) {

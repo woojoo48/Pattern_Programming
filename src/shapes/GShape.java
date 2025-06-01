@@ -8,8 +8,10 @@ import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
+import java.io.Serializable;
 
-public abstract  class GShape {
+public abstract  class GShape implements Serializable{
+	private static final long serialVersionUID = 1L;
 	private final static int ANCHOR_W = 10;
 	private final static int ANCHOR_H = 10;
 	
@@ -124,14 +126,12 @@ public abstract  class GShape {
 		if(bSelected) {
 		    this.setAnchors();
 		    for(int i = 0;i<this.anchors.length;i++) {
-		        // 앵커 중심점을 변형 적용
 		        double anchorCenterX = anchors[i].getCenterX();
 		        double anchorCenterY = anchors[i].getCenterY();
 		        
 		        Point2D center = new Point2D.Double(anchorCenterX, anchorCenterY);
 		        Point2D transformedCenter = this.affineTransform.transform(center, null);
 		        
-		        // 변형된 위치에 원본 크기 앵커 생성
 		        Ellipse2D fixedSizeAnchor = new Ellipse2D.Double(
 		            transformedCenter.getX() - ANCHOR_W/2,
 		            transformedCenter.getY() - ANCHOR_H/2,
@@ -139,14 +139,14 @@ public abstract  class GShape {
 		            ANCHOR_H
 		        );
 		        
-		        // 그리기
 		        Color penColor = graphics2D.getColor();
 		        graphics2D.setColor(Color.WHITE);
 		        graphics2D.fill(fixedSizeAnchor);
 		        graphics2D.setColor(penColor);
 		        graphics2D.draw(fixedSizeAnchor);
 		    }
-		}	}
+		}	
+	}
 	
 	public boolean contains(int x, int y) {
 		if(bSelected) {

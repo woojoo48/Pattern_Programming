@@ -33,11 +33,11 @@ public class GRotater extends GTransformer {
         double dp = rp - op;
 
         //rotate시 각도 점프 방지. 그러나 굳이 필요할까?
-//        if (dp > Math.PI) {
-//            dp -= 2 * Math.PI;
-//        } else if (dp < -Math.PI) {
-//            dp += 2 * Math.PI;
-//        }
+        if (dp > Math.PI) {
+            dp -= 2 * Math.PI;
+        } else if (dp < -Math.PI) {
+            dp += 2 * Math.PI;
+        }
         
         // 이동-회전-역이동 방식으로 회전 적용
         //원점을 도형의 중앙으로 이동

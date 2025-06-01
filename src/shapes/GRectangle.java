@@ -3,6 +3,7 @@ package shapes;
 import java.awt.geom.Rectangle2D;
 
 public class GRectangle extends GShape{
+	private static final long serialVersionUID = 1L;
 	private Rectangle2D rectangle;
 	
 	public GRectangle() {

@@ -6,6 +6,8 @@ import java.awt.FlowLayout;
 
 import javax.swing.JFrame;
 
+import global.GConstants;
+
 public class GMainFrame extends JFrame{
 	//attributes
 	private static final long serialVersionUID = 1L;
@@ -20,7 +22,7 @@ public class GMainFrame extends JFrame{
 	public GMainFrame() {
 		//attributes
 		this.setLocationRelativeTo(null);
-		this.setSize(400, 400);
+		this.setSize(GConstants.GMainFrame.SCREEN_WIDTH, GConstants.GMainFrame.SCREEN_HEIGHT);
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		
 		//components
