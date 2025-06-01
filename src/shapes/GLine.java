@@ -3,7 +3,8 @@ package shapes;
 import java.awt.geom.Line2D;
 
 public class GLine extends GShape {
-    private Line2D.Float line;
+	private static final long serialVersionUID = 1L;
+	private Line2D.Float line;
 
     public GLine() {
         super(new Line2D.Float(0, 0, 0, 0));

@@ -3,7 +3,8 @@ package shapes;
 import java.awt.geom.Ellipse2D;
 
 public class GEllipse extends GShape {
-    private Ellipse2D.Float ellipse;
+	private static final long serialVersionUID = 1L;
+	private Ellipse2D.Float ellipse;
 
     public GEllipse() {
         super(new Ellipse2D.Float(0, 0, 0, 0));

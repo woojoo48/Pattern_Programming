@@ -47,7 +47,6 @@ public abstract  class GShape implements Serializable{
 	private boolean bSelected;
 	private EAnchor eSelectedAnchor;
 	private AffineTransform affineTransform;
-	private int px,py;
 	
 	public GShape(Shape shape) {
 		this.shape = shape;

@@ -2,7 +2,6 @@ package frames;
 
 import java.awt.BorderLayout;
 import java.awt.LayoutManager;
-import java.awt.FlowLayout;
 
 import javax.swing.JFrame;
 
