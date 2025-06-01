@@ -7,6 +7,26 @@ public class GConstants {
 		public static final  int SCREEN_HEIGHT = 400;
 	}
 	
+	public final class GFileMenu {
+		public static final String DEFAULT_FILE_EXTENSTION = "Shape Files (*.shapes)";
+		public static final String DEFAULT_FILE_EXTENSTION_TYPE = "shapes";
+		public static final String DEFAULT_FILE_NAME = "default.shapes";
+		public static final String DEFAULT_FILE_TYPE = ".shapes";
+
+		public static final String SAVE_OPTION_MSG = "Do you want to save the file before opening it?";
+		public static final String SAVE_MSG = "save";
+		public static final String OVERWRITE_OPTION_MSG = "File already exist. Overwrite?";
+		public static final String OVERWRITE_MSG = "Overwrite";
+		public static final String CANCEL = "cancel";
+		public static final String SAVE_AS = "save As";
+		public static final String SAVE = "save";
+		public static final String SAVE_NOT = "not save";
+		public static final String OPEN = "open : ";
+		public static final String OPEN_NOT = "Not Open";
+
+
+	}
+	
 	public enum EFileMenuItem{
 		eNew("새 파일","newPanel"),
 		eOpen("열기","open"),
