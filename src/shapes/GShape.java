@@ -170,28 +170,9 @@ public abstract  class GShape implements Serializable{
 		return this.shape.contains(shape.getShape().getBounds());
 	}
 	
-	//translation
-	public void setMovePoint(int x, int y) {
-			this.px = x;
-			this.py = y;
-	}
-
-	public void movePoint(int x, int y) {
-			int dx = x - px;
-			int dy = y - py;
-			
-			this.affineTransform.translate(dx, dy);
-
-			this.px = x;
-			this.py = y;
-	}
-	
 	//draw method
 	public abstract void setPoint(int x, int y);
 	public abstract void addPoint(int x, int y);
 	public abstract void dragPoint(int x, int y);
 
-	public void translate(int tx, int ty) {
-		this.affineTransform.translate(tx, ty);		
-	}
 }

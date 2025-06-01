@@ -60,7 +60,7 @@ public class GFileMenu extends JMenu{
 			BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(fileOutputStream);
 			ObjectOutputStream objectOutputStream = new ObjectOutputStream(bufferedOutputStream);
 			
-			objectOutputStream.writeObject(this.drawingPanel.getShape());
+			objectOutputStream.writeObject(shapes);
 			objectOutputStream.close();
 		} catch (IOException e) {
 			e.printStackTrace();
