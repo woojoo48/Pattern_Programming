@@ -32,9 +32,11 @@ public class GDrawingPanel extends JPanel {
     //저장할때 다 저장하는 것이 아니라 vector만 저장하는 것이 더 효율적
     private Vector<GShape> shapes;
     
+    //working object
     private GTransformer transformer;
     private GShape currentShape;
     private GShape selectedShape;
+    private boolean bUpdated;
     
     //constraint
     private EShapeTool eShapeTool;
@@ -52,12 +54,14 @@ public class GDrawingPanel extends JPanel {
         this.shapes = new Vector<GShape>();
         this.eShapeTool = null;
         this.eDrawingState = EDrawingState.eIdle;
+        this.bUpdated = false;
     }
 
     public void initialize() {
-        
+		this.shapes.clear();
+		this.repaint();
     }
-    
+    //getter and setter
     public Vector<GShape> getShape(){
     	return this.shapes;
     }
@@ -74,6 +78,16 @@ public class GDrawingPanel extends JPanel {
         this.eShapeTool = eShapeTool;
     }
     
+
+	public boolean isUpdated() {
+		return this.bUpdated;
+	}
+	
+	public void setBUpdated(boolean bUpdated) {
+		this.bUpdated = bUpdated;
+	}
+	
+	//methods
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         
@@ -91,6 +105,7 @@ public class GDrawingPanel extends JPanel {
         return null;
     }
     
+    //affine transform methods
     private void startTransform(int x, int y) {
 		//set shape
 		this.currentShape = eShapeTool.newShape();
@@ -139,7 +154,7 @@ public class GDrawingPanel extends JPanel {
 		    } else {
 		        this.selectShape(this.currentShape);
 		    }
-		    
+			this.bUpdated = true;
 		    this.repaint();
 		}
 	
@@ -234,4 +249,5 @@ public class GDrawingPanel extends JPanel {
 
 		}
 	}
+
 }

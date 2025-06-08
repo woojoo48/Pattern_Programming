@@ -12,8 +12,9 @@ public class GConstants {
 		public static final String DEFAULT_FILE_EXTENSTION_TYPE = "shapes";
 		public static final String DEFAULT_FILE_NAME = "default.shapes";
 		public static final String DEFAULT_FILE_TYPE = ".shapes";
+		public static final String DEFAULT_FILE_ROOT = "C:\\Users\\wjddn\\eclipse-workspace\\Pattern_asssignment";
 
-		public static final String SAVE_OPTION_MSG = "Do you want to save the file before opening it?";
+		public static final String SAVE_OPTION_MSG = "변경내용을 저장 할까요?";
 		public static final String SAVE_MSG = "save";
 		public static final String OVERWRITE_OPTION_MSG = "File already exist. Overwrite?";
 		public static final String OVERWRITE_MSG = "Overwrite";
@@ -32,7 +33,6 @@ public class GConstants {
 		eOpen("열기","open"),
 		eSave("저장","save"),
 		eSaveAs("다른 이름으로 저장","saveAs"),
-		ePrint("인쇄","print"),
 		eQuit("종료","quit");
 		
 		//핫키, 툴팁또한 설정해도 됨

@@ -28,17 +28,12 @@ public class GFileMenu extends JMenu{
 	private static final long serialVersionUID = 1L;
 
 	private GDrawingPanel drawingPanel;
-	private File currentFile;
+	private File dir;
+	private File file;
 	private JFileChooser fileChooser;
 	
 	public GFileMenu() {
 		super("File");
-		this.currentFile = null;
-		this.fileChooser = new JFileChooser();
-		FileNameExtensionFilter filter = new FileNameExtensionFilter(
-				GConstants.GFileMenu.DEFAULT_FILE_EXTENSTION, 
-				GConstants.GFileMenu.DEFAULT_FILE_EXTENSTION_TYPE);
-		this.fileChooser.setFileFilter(filter);
 		
 		ActionHandler actionHandler = new ActionHandler();
 		for(EFileMenuItem eMenuItem : EFileMenuItem.values()) {
@@ -50,7 +45,15 @@ public class GFileMenu extends JMenu{
 	}
 
 	public void initialize() {
+		this.dir = new File(GConstants.GFileMenu.DEFAULT_FILE_ROOT);
+		this.file = null;
 		
+		this.fileChooser = new JFileChooser(this.dir);
+		FileNameExtensionFilter filter = new FileNameExtensionFilter(
+				GConstants.GFileMenu.DEFAULT_FILE_EXTENSTION, 
+				GConstants.GFileMenu.DEFAULT_FILE_EXTENSTION_TYPE);
+		this.fileChooser.setFileFilter(filter);
+		this.fileChooser.setSelectedFile(new File(GConstants.GFileMenu.DEFAULT_FILE_NAME));
 	}
 	
 	public void associate(GDrawingPanel drawingPanel) {
@@ -60,111 +63,115 @@ public class GFileMenu extends JMenu{
 	//fileMunu method
 	public void newPanel() {
 		System.out.println("newPanel");
+		if(this.close()) {
+			this.drawingPanel.initialize();
+			this.file = null;
+		}
 	}
 	
 	public void open() {
-		int saveOption = JOptionPane.showConfirmDialog(this, 
-				GConstants.GFileMenu.SAVE_OPTION_MSG,
-				GConstants.GFileMenu.SAVE_MSG,
-				 JOptionPane.YES_NO_OPTION);
-		 if(saveOption == JOptionPane.YES_OPTION) {
-			 save();
-		} 
-		 
-		int result = fileChooser.showOpenDialog(this);
-		if (result == JFileChooser.APPROVE_OPTION) { 
-		        File selectedFile = fileChooser.getSelectedFile();
-		        
-		        try {
-		            FileInputStream fileInputStream = new FileInputStream(selectedFile);
-		            BufferedInputStream bufferedInputStream = new BufferedInputStream(fileInputStream);
-		            ObjectInputStream objectInputStream = new ObjectInputStream(bufferedInputStream);
+		if(this.close()) {
+			int result = fileChooser.showOpenDialog(this.drawingPanel);
+	        
+	        if(result == JFileChooser.APPROVE_OPTION) {
+	            this.loadFileChooser();
+	            
+	            try {
+	                FileInputStream fileInputStream = new FileInputStream(this.file);
+	                BufferedInputStream bufferedInputStream = new BufferedInputStream(fileInputStream);
+	                ObjectInputStream objectInputStream = new ObjectInputStream(bufferedInputStream);
 
-		            @SuppressWarnings("unchecked")
-					Vector<GShape> loadedShapes = (Vector<GShape>) objectInputStream.readObject();
-		            objectInputStream.close();
-
-		            this.drawingPanel.setShapes(loadedShapes);
-		            this.drawingPanel.repaint();
-		            
-		            this.currentFile = selectedFile;
-		            
-		            System.out.println(GConstants.GFileMenu.OPEN + selectedFile.getAbsolutePath());
-		            
-		        } catch (IOException | ClassNotFoundException e) {
-		            System.out.println(GConstants.GFileMenu.OPEN_NOT + e.getMessage());
-		            e.printStackTrace();
-		        } 
-		    } else {
-		        System.out.println(GConstants.GFileMenu.CANCEL);
-		    }
+	                @SuppressWarnings("unchecked")
+	                Vector<GShape> loadedShapes = (Vector<GShape>) objectInputStream.readObject();
+	                objectInputStream.close();
+	                    
+	                this.drawingPanel.setShapes(loadedShapes);
+	                this.drawingPanel.repaint();
+	                            
+	            } catch (IOException | ClassNotFoundException e) {
+	                System.out.println(GConstants.GFileMenu.OPEN_NOT + e.getMessage());
+	                e.printStackTrace();
+	            }
+	        } else {
+	            System.out.println(GConstants.GFileMenu.CANCEL);
+	        }
+	    }
 	}
 	
-	public void save() {
-		if(this.currentFile == null) {
-			this.saveAs();
-		} else {
-			this.saveCurrentFile(this.currentFile);
+	public boolean save() {
+		if(this.file == null) {
+			return this.saveAs();
+			} else {
+			return this.saveToFile();
+			}
 		}
-	}
 	
-	public void saveAs() {
+	public boolean saveAs() {
 		System.out.println(GConstants.GFileMenu.SAVE_AS);
-		this.fileChooser.setSelectedFile(new File(GConstants.GFileMenu.DEFAULT_FILE_NAME));
 		
-		int result = fileChooser.showSaveDialog(this);
+		boolean bCancel = false;
+
+		int result = this.fileChooser.showSaveDialog(this.drawingPanel);
 		
 		if(result == JFileChooser.APPROVE_OPTION) {
-			 File selectedFile = fileChooser.getSelectedFile();
-			 //기본 확장자 명시 만약 .shapes로 끝나지 않는다면 추가
-			 if (!selectedFile.getName().toLowerCase().endsWith(GConstants.GFileMenu.DEFAULT_FILE_TYPE)) {
-		            selectedFile = new File(selectedFile.getAbsolutePath() + GConstants.GFileMenu.DEFAULT_FILE_TYPE);
-		     }
-			 
-			 if(selectedFile.exists()) {
-				 int saveAsOption = JOptionPane.showConfirmDialog(this, 
-						GConstants.GFileMenu.OVERWRITE_OPTION_MSG,
-						GConstants.GFileMenu.OVERWRITE_MSG,
-						JOptionPane.YES_NO_OPTION);
-				 if(saveAsOption == JOptionPane.NO_OPTION) {
-					 saveAs();
-					 return;
-				 }
-			 }
-			 saveCurrentFile(selectedFile);
-		} else {
-			System.out.println(GConstants.GFileMenu.CANCEL);
-		}
-	
+	        this.loadFileChooser();
+	        
+			 if (!file.getName().toLowerCase().endsWith(GConstants.GFileMenu.DEFAULT_FILE_TYPE)) {
+		            file = new File(file.getAbsolutePath() + GConstants.GFileMenu.DEFAULT_FILE_TYPE);
+		     	}
+			 bCancel = this.saveToFile();
+			} else {
+				bCancel = true;
+				System.out.println(GConstants.GFileMenu.CANCEL);
+			}
+			return bCancel;
 	}
 	
-	private void saveCurrentFile(File file) {
-		Vector<GShape> shapes = this.drawingPanel.getShape();
+	private boolean saveToFile() {
 		try {
-			FileOutputStream fileOutputStream = new FileOutputStream(file);
+			System.out.println(GConstants.GFileMenu.SAVE);
+			Vector<GShape> shapes = this.drawingPanel.getShape();
+			FileOutputStream fileOutputStream = new FileOutputStream(this.file);
 			BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(fileOutputStream);
 			ObjectOutputStream objectOutputStream = new ObjectOutputStream(bufferedOutputStream);
 			
 			objectOutputStream.writeObject(shapes);
 			objectOutputStream.close();
-			this.currentFile = file;
-			System.out.println(GConstants.GFileMenu.SAVE);
-			} catch (IOException e) {
-				System.out.println(GConstants.GFileMenu.SAVE_NOT);
-				e.printStackTrace();
-			} 
-		} 
-	
-	public void print() {
-		System.out.println("print");
-
+			this.drawingPanel.setBUpdated(false);
+			return false;
+		} catch (IOException e) {
+			System.out.println(GConstants.GFileMenu.SAVE_NOT);
+			e.printStackTrace();
+			return true;
+		}
 	}
 	
 	public void quit() {
 		System.out.println("quit");
+		if(this.close()) {
+			System.exit(0);
+		}
 
 	}
 	
+	public boolean close() {
+		 boolean bCancel = false;
+		 
+		    if(this.drawingPanel.isUpdated()) {
+		        int reply = JOptionPane.showConfirmDialog(this.drawingPanel, GConstants.GFileMenu.SAVE_OPTION_MSG);
+		        if(reply == JOptionPane.CANCEL_OPTION) {
+		            bCancel = true;
+		        } else if(reply == JOptionPane.OK_OPTION) {
+		            bCancel = this.save();
+		        }
+		    }
+		    return !bCancel;
+	}
+	
+	private void loadFileChooser() {
+		this.dir = this.fileChooser.getCurrentDirectory();
+		this.file = this.fileChooser.getSelectedFile();
+	}
 	
 	//actionHandler
 	private void invokeMethod(String methodName) {
