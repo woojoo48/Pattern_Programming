@@ -105,7 +105,7 @@ public class GDrawingPanel extends JPanel {
         return null;
     }
     
-	private void clearAllSelection() {
+	private void clearAnchor() {
 		for(GShape shape : shapes) {
 			shape.setSelected(false);
 		}
@@ -129,38 +129,21 @@ public class GDrawingPanel extends JPanel {
 			GShape clickedShape = onShape(x, y);
 			
 			if(clickedShape == null) {
-				clearAllSelection();
+				clearAnchor();
 				this.currentShape = eShapeTool.newShape();
 				this.shapes.add(this.currentShape);
 				this.transformer = new GDrawer(this.currentShape);
-			} else {
-				if(clickedShape == this.selectedShape && clickedShape.isSelected()) {
-					EAnchor selectedAnchor = clickedShape.getESeletedAnchor();
-					
-					if(selectedAnchor == EAnchor.eMM) {
-						clickedShape.setSelected(false);
-						this.selectedShape = null;
-						// transform 시작하지 않고 바로 리턴
-						return;
-					} else {
-						if(selectedAnchor == EAnchor.eRR){
-							this.transformer = new GRotater(this.selectedShape);
-						} else {
-							this.transformer = new GResizer(this.selectedShape);
-						}
-					}
+				} else  {
+				//엥커 선택 전환
+				selectShape(clickedShape);
+				this.selectedShape = clickedShape;
+				EAnchor selectedAnchor = clickedShape.getESeletedAnchor();
+				if(selectedAnchor == EAnchor.eMM){
+					this.transformer = new GMover(this.selectedShape);
+				} else if(selectedAnchor == EAnchor.eRR){
+					this.transformer = new GRotater(this.selectedShape);
 				} else {
-					//엥커 선택 전환
-					selectShape(clickedShape);
-					this.selectedShape = clickedShape;
-					EAnchor selectedAnchor = clickedShape.getESeletedAnchor();
-					if(selectedAnchor == EAnchor.eMM){
-						this.transformer = new GMover(this.selectedShape);
-					} else if(selectedAnchor == EAnchor.eRR){
-						this.transformer = new GRotater(this.selectedShape);
-					} else {
-						this.transformer = new GResizer(this.selectedShape);
-					}
+					this.transformer = new GResizer(this.selectedShape);
 				}
 			}
 		} else {
@@ -168,7 +151,6 @@ public class GDrawingPanel extends JPanel {
 			this.shapes.add(this.currentShape);
 			this.transformer = new GDrawer(this.currentShape);
 		}
-		
 		this.transformer.start((Graphics2D) getGraphics(), x, y);
 	}
 

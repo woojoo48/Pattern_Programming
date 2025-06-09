@@ -8,6 +8,8 @@ public class GMenuBar extends JMenuBar{
 	private static final long serialVersionUID = 1L;
 	//components
 	private GFileMenu fileMenu;
+//	private GEditMenu editMenu;
+//	
 	//association
 	private GDrawingPanel drawingPanel;
 	
