@@ -3,7 +3,6 @@ package transformers;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 
-
 import shapes.GShape;
 
 public class GMover extends GTransformer {
@@ -24,16 +23,25 @@ public class GMover extends GTransformer {
 
 	@Override
 	public void drag(Graphics2D g2d, int x, int y) {
-		AffineTransform affineTransform = this.shape.getAffineTransform();
-		
 		int dx = x - px;
 		int dy = y - py;
 		
-		affineTransform.translate(dx, dy);
+		if (shape.isGrouped() && groupShapes != null) {
+			// ✨ 그룹 전체 이동
+			int groupId = shape.getGroupId();
+			for (GShape s : groupShapes) {
+				if (s.getGroupId() == groupId) {
+					s.getAffineTransform().translate(dx, dy);
+				}
+			}
+		} else {
+			// 개별 도형 이동
+			AffineTransform affineTransform = this.shape.getAffineTransform();
+			affineTransform.translate(dx, dy);
+		}
 
 		this.px = x;
 		this.py = y;
-		
 	}
 
 	@Override

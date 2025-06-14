@@ -48,6 +48,9 @@ public abstract  class GShape implements Serializable{
 	private EAnchor eSelectedAnchor;
 	private AffineTransform affineTransform;
 	
+	// ✨ 간단한 그룹화를 위한 groupId 추가
+	private int groupId = -1;  // -1이면 그룹화 안됨, 양수면 그룹 ID
+	
 	public GShape(Shape shape) {
 		this.shape = shape;
 		this.affineTransform = new AffineTransform();
@@ -60,6 +63,7 @@ public abstract  class GShape implements Serializable{
 		this.bSelected = false;
 		this.eSelectedAnchor = null;
 	}
+	
 	//Getter and Setter
 	public AffineTransform getAffineTransform() {
 		return this.affineTransform;
@@ -87,6 +91,19 @@ public abstract  class GShape implements Serializable{
 	
 	public Rectangle getBounds() {
 		return this.shape.getBounds();
+	}
+	
+	// ✨ 그룹화 관련 메서드들
+	public int getGroupId() {
+		return this.groupId;
+	}
+	
+	public void setGroupId(int groupId) {
+		this.groupId = groupId;
+	}
+	
+	public boolean isGrouped() {
+		return this.groupId != -1;
 	}
 	
 	//methods

@@ -1,13 +1,19 @@
 package transformers;
 
 import java.awt.Graphics2D;
+import java.util.Vector;
 import shapes.GShape;
 
 public abstract class GTransformer {
     protected GShape shape;
+    protected Vector<GShape> groupShapes;
     
     public GTransformer(GShape shape) {
     	this.shape = shape;
+    }
+    
+    public void setAllShapes(Vector<GShape> groupShapes) {
+        this.groupShapes = groupShapes;
     }
     
     public abstract void start(Graphics2D g2D, int x, int y); 

@@ -29,7 +29,6 @@ import slideFrame.GSlideManager;
 public class GFileMenu extends JMenu{
     private static final long serialVersionUID = 1L;
 
-    // ✨ 변경: DrawingPanel 대신 SlideManager와 연결
     private GSlideManager slideManager;
     private File dir;
     private File file;
@@ -59,22 +58,17 @@ public class GFileMenu extends JMenu{
         this.fileChooser.setSelectedFile(new File("presentation.presentation"));
     }
     
-    // ✨ 새로운 associate 메서드
     public void associate(GSlideManager slideManager) {
         this.slideManager = slideManager;
     }
     
-    // 기존 메서드는 호환성을 위해 유지
     public void associate(GDrawingPanel drawingPanel) {
-        // 레거시 지원
     }
 
-    // ===== 파일 메뉴 메서드들 =====
-    
     public void newPanel() {
         System.out.println("newPanel");
         if(this.close()) {
-            this.slideManager.newPresentation();  // ✨ 전체 프레젠테이션 초기화
+            this.slideManager.newPresentation();
             this.file = null;
         }
     }
@@ -91,12 +85,11 @@ public class GFileMenu extends JMenu{
                     BufferedInputStream bufferedInputStream = new BufferedInputStream(fileInputStream);
                     ObjectInputStream objectInputStream = new ObjectInputStream(bufferedInputStream);
 
-                    // ✨ 전체 슬라이드 리스트 로드
                     @SuppressWarnings("unchecked")
                     Vector<GSlide> loadedSlides = (Vector<GSlide>) objectInputStream.readObject();
                     objectInputStream.close();
                         
-                    this.slideManager.loadAllSlides(loadedSlides);  // ✨ 전체 슬라이드 로드
+                    this.slideManager.loadAllSlides(loadedSlides);
                                 
                 } catch (IOException | ClassNotFoundException e) {
                     System.out.println("파일 열기 실패: " + e.getMessage());
@@ -141,17 +134,16 @@ public class GFileMenu extends JMenu{
         try {
             System.out.println("파일 저장 중...");
             
-            // ✨ 전체 슬라이드 저장
             Vector<GSlide> allSlides = this.slideManager.getAllSlides();
             
             FileOutputStream fileOutputStream = new FileOutputStream(this.file);
             BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(fileOutputStream);
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(bufferedOutputStream);
             
-            objectOutputStream.writeObject(allSlides);  // ✨ 전체 슬라이드 저장
+            objectOutputStream.writeObject(allSlides);
             objectOutputStream.close();
             
-            this.slideManager.setModified(false);  // ✨ 전체 프레젠테이션 저장 상태로 변경
+            this.slideManager.setModified(false);
             return false;
         } catch (IOException e) {
             System.out.println("저장 실패");
@@ -170,7 +162,7 @@ public class GFileMenu extends JMenu{
     public boolean close() {
         boolean bCancel = false;
         
-        if(this.slideManager.isModified()) {  // ✨ 전체 프레젠테이션 수정 여부 확인
+        if(this.slideManager.isModified()) {
             int reply = JOptionPane.showConfirmDialog(
                 this.slideManager, 
                 "변경내용을 저장 할까요?"
