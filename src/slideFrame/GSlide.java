@@ -1,10 +1,14 @@
+// ===== GSlide.java 수정 - Custom Serialization =====
+
 package slideFrame;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Vector;
 
@@ -14,13 +18,16 @@ import shapes.GShape;
 public class GSlide implements Serializable {
     private static final long serialVersionUID = 1L;
     
-    //components
-    private GDrawingPanel drawingPanel;
+    // ✨ UI 컴포넌트는 transient로! (저장 안됨)
+    private transient GDrawingPanel drawingPanel;
     
-    //attributes
+    // ✨ 실제 저장할 데이터들
     private String name;
     private boolean isModified;
     private Color backgroundColor;
+    
+    // ✨ 핵심 데이터: 도형들 (이것만 저장하면 됨!)
+    private Vector<GShape> shapes;
     
     // 썸네일 관련 (transient - 런타임에만 사용)
     private transient BufferedImage thumbnail;
@@ -30,7 +37,6 @@ public class GSlide implements Serializable {
         this("새 슬라이드");
     }
     
-
     public GSlide(String name) {
         //attributes
         this.name = name;
@@ -38,11 +44,13 @@ public class GSlide implements Serializable {
         this.backgroundColor = Color.WHITE;
         this.thumbnailNeedsUpdate = true;
         
+        // ✨ 도형 리스트 직접 관리
+        this.shapes = new Vector<GShape>();
+        
         //components
         this.createDrawingPanel();
     }
     
-
     public GSlide(GSlide other) {
         //attributes
         this.name = other.name + " 복사본";
@@ -50,23 +58,26 @@ public class GSlide implements Serializable {
         this.backgroundColor = other.backgroundColor;
         this.thumbnailNeedsUpdate = true;
         
+        // ✨ 도형들 복사
+        this.shapes = new Vector<GShape>(other.shapes);
+        
         //components
         this.createDrawingPanel();
-        if (other.drawingPanel != null) {
-            Vector<GShape> originalShapes = other.drawingPanel.getShape();
-            Vector<GShape> copiedShapes = new Vector<GShape>(originalShapes);
-            this.drawingPanel.setShapes(copiedShapes);
-        }
     }
-    
 
     private void createDrawingPanel() {
         this.drawingPanel = new GDrawingPanel();
         this.drawingPanel.initialize();
         this.drawingPanel.setBackground(this.backgroundColor);
+        
+        // ✨ 기존 도형들이 있다면 DrawingPanel에 설정
+        if (this.shapes != null) {
+            this.drawingPanel.setShapes(this.shapes);
+        }
     }
     
-
+    // ===== 핵심 접근자 메서드 =====
+    
     public GDrawingPanel getDrawingPanel() {
         if (this.drawingPanel == null) {
             this.createDrawingPanel();
@@ -74,18 +85,26 @@ public class GSlide implements Serializable {
         return this.drawingPanel;
     }
     
-
+    // ✨ 도형 관리 - shapes 필드를 직접 사용하되, DrawingPanel과 동기화
     public Vector<GShape> getShapes() {
-        return this.getDrawingPanel().getShape();
+        // DrawingPanel이 있으면 그쪽에서 가져오기 (최신 상태)
+        if (this.drawingPanel != null) {
+            this.shapes = this.drawingPanel.getShape();
+        }
+        return this.shapes;
     }
-
+    
     public void setShapes(Vector<GShape> shapes) {
-        this.getDrawingPanel().setShapes(shapes);
+        this.shapes = shapes;
+        if (this.drawingPanel != null) {
+            this.drawingPanel.setShapes(shapes);
+        }
         this.setModified(true);
         this.thumbnailNeedsUpdate = true;
     }
     
-  
+    // ===== 기본 속성 관리 =====
+    
     public String getName() {
         return this.name;
     }
@@ -124,19 +143,20 @@ public class GSlide implements Serializable {
         this.setModified(true);
     }
     
+    // ===== 도형 관리 메서드들 (기존과 동일) =====
     
     public void addShape(GShape shape) {
-        this.getDrawingPanel().getShape().add(shape);
+        this.getShapes().add(shape);  // getShapes()가 동기화 처리
         this.setModified(true);
     }
     
     public void removeShape(GShape shape) {
-        this.getDrawingPanel().getShape().remove(shape);
+        this.getShapes().remove(shape);
         this.setModified(true);
     }
     
     public void removeShape(int index) {
-        Vector<GShape> shapes = this.getDrawingPanel().getShape();
+        Vector<GShape> shapes = this.getShapes();
         if (index >= 0 && index < shapes.size()) {
             shapes.remove(index);
             this.setModified(true);
@@ -144,18 +164,19 @@ public class GSlide implements Serializable {
     }
     
     public void clearShapes() {
-        this.getDrawingPanel().getShape().clear();
+        this.getShapes().clear();
         this.setModified(true);
     }
     
     public int getShapeCount() {
-        return this.getDrawingPanel().getShape().size();
+        return this.getShapes().size();
     }
     
     public boolean isEmpty() {
-        return this.getDrawingPanel().getShape().isEmpty();
+        return this.getShapes().isEmpty();
     }
     
+    // ===== 썸네일 관련 메서드들 =====
     
     public BufferedImage getThumbnail() {
         return this.thumbnail;
@@ -173,7 +194,7 @@ public class GSlide implements Serializable {
     public void markThumbnailForUpdate() {
         this.thumbnailNeedsUpdate = true;
     }
-
+    
     public BufferedImage generateThumbnail(int width, int height) {
         BufferedImage thumbnail = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         Graphics2D g2d = thumbnail.createGraphics();
@@ -185,13 +206,12 @@ public class GSlide implements Serializable {
             g2d.setColor(this.backgroundColor);
             g2d.fillRect(0, 0, width, height);
             
-            if (this.drawingPanel != null) {
+            if (this.shapes != null && !this.shapes.isEmpty()) {
                 double scaleX = (double) width / 1000.0;
                 double scaleY = (double) height / 600.0;
                 g2d.scale(scaleX, scaleY);
                 
-                Vector<GShape> shapes = this.drawingPanel.getShape();
-                for (GShape shape : shapes) {
+                for (GShape shape : this.shapes) {
                     shape.draw(g2d);
                 }
             }
@@ -203,13 +223,34 @@ public class GSlide implements Serializable {
         this.thumbnailNeedsUpdate = false;
         return thumbnail;
     }
-
+    
+    // ✨ 핵심: Custom Serialization
+    // 파일에 저장할 때 - 필요한 데이터만 저장
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        // DrawingPanel에서 최신 도형 상태 가져오기
+        if (this.drawingPanel != null) {
+            this.shapes = this.drawingPanel.getShape();
+        }
+        
+        // 기본 필드들 저장 (shapes, name, isModified, backgroundColor)
+        out.defaultWriteObject();
+        
+        System.out.println("슬라이드 '" + this.name + "' 저장됨 - 도형 " + this.shapes.size() + "개");
+    }
+    
+    // 파일에서 로드할 때 - 저장된 데이터로 복원
     private void readObject(ObjectInputStream in) 
-            throws java.io.IOException, ClassNotFoundException {
+            throws IOException, ClassNotFoundException {
+        // 기본 필드들 복원 (shapes, name, isModified, backgroundColor)
         in.defaultReadObject();
         
-        this.createDrawingPanel();
+        // transient 필드들 초기화
         this.thumbnailNeedsUpdate = true;
+        
+        // DrawingPanel 재생성 및 도형들 설정
+        this.createDrawingPanel();
+        
+        System.out.println("슬라이드 '" + this.name + "' 로드됨 - 도형 " + this.shapes.size() + "개");
     }
     
     @Override

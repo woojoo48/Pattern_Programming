@@ -16,9 +16,30 @@ import javax.swing.JScrollPane;
 
 import global.GConstants;
 
-
 public class GSlideThumbnailPanel extends JPanel {
     private static final long serialVersionUID = 1L;
+    
+    // ✨ 새로 추가: 슬라이드 버튼 enum
+    public enum ESlideButton {
+        eAddSlide("+", new Dimension(40, 30), "ADD_SLIDE"),
+        eRemoveSlide("-", new Dimension(40, 30), "REMOVE_SLIDE"),
+        ePrevSlide("이전", new Dimension(60, 30), "PREV_SLIDE"),
+        eNextSlide("다음", new Dimension(60, 30), "NEXT_SLIDE");
+        
+        private String text;
+        private Dimension size;
+        private String actionCommand;
+        
+        private ESlideButton(String text, Dimension size, String actionCommand) {
+            this.text = text;
+            this.size = size;
+            this.actionCommand = actionCommand;
+        }
+        
+        public String getText() { return this.text; }
+        public Dimension getSize() { return this.size; }
+        public String getActionCommand() { return this.actionCommand; }
+    }
     
     //components
     private JPanel thumbnailContainer;
@@ -39,7 +60,6 @@ public class GSlideThumbnailPanel extends JPanel {
         //components
         this.thumbnailItems = new Vector<ThumbnailItem>();
         
-
         this.setLayout(new BorderLayout());
         this.setBackground(new Color(240, 240, 240));
         this.setPreferredSize(new Dimension(GConstants.GSlidePanel.PANEL_WIDTH, 0));
@@ -57,7 +77,6 @@ public class GSlideThumbnailPanel extends JPanel {
         this.scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         this.add(scrollPane, BorderLayout.CENTER);
         
-
         this.controlPanel = createControlPanel();
         this.add(controlPanel, BorderLayout.SOUTH);
     }
@@ -70,48 +89,45 @@ public class GSlideThumbnailPanel extends JPanel {
         this.slideManager = slideManager;
     }
     
-
+    // ✨ 개선된 createControlPanel
     private JPanel createControlPanel() {
         JPanel controlPanel = new JPanel();
         controlPanel.setLayout(new BoxLayout(controlPanel, BoxLayout.Y_AXIS));
         controlPanel.setBackground(new Color(240, 240, 240));
         
-        JPanel buttonRow1 = new JPanel(new FlowLayout());
-        buttonRow1.setBackground(new Color(240, 240, 240));
+        // 첫 번째 줄: + - 버튼들
+        JPanel buttonRow1 = createButtonRow(ESlideButton.eAddSlide, ESlideButton.eRemoveSlide);
         
-        JButton addBtn = new JButton("+");
-        addBtn.setPreferredSize(new Dimension(40, 30));
-        addBtn.setActionCommand("ADD_SLIDE");
-        addBtn.addActionListener(new SlideActionHandler());
-        
-        JButton deleteBtn = new JButton("-");
-        deleteBtn.setPreferredSize(new Dimension(40, 30));
-        deleteBtn.setActionCommand("REMOVE_SLIDE");
-        deleteBtn.addActionListener(new SlideActionHandler());
-        
-        buttonRow1.add(addBtn);
-        buttonRow1.add(deleteBtn);
-        
-        JPanel buttonRow2 = new JPanel(new FlowLayout());
-        buttonRow2.setBackground(new Color(240, 240, 240));
-        
-        JButton prevBtn = new JButton("이전");
-        prevBtn.setPreferredSize(new Dimension(60, 30));
-        prevBtn.setActionCommand("PREV_SLIDE");
-        prevBtn.addActionListener(new SlideActionHandler());
-        
-        JButton nextBtn = new JButton("다음");
-        nextBtn.setPreferredSize(new Dimension(60, 30));
-        nextBtn.setActionCommand("NEXT_SLIDE");
-        nextBtn.addActionListener(new SlideActionHandler());
-        
-        buttonRow2.add(prevBtn);
-        buttonRow2.add(nextBtn);
+        // 두 번째 줄: 이전/다음 버튼들  
+        JPanel buttonRow2 = createButtonRow(ESlideButton.ePrevSlide, ESlideButton.eNextSlide);
         
         controlPanel.add(buttonRow1);
         controlPanel.add(buttonRow2);
         
         return controlPanel;
+    }
+    
+    // ✨ 새로운 헬퍼 메서드: 버튼 행 생성
+    private JPanel createButtonRow(ESlideButton... buttons) {
+        JPanel buttonRow = new JPanel(new FlowLayout());
+        buttonRow.setBackground(new Color(240, 240, 240));
+        
+        // for문으로 간단하게!
+        for (ESlideButton buttonType : buttons) {
+            JButton button = createSlideButton(buttonType);
+            buttonRow.add(button);
+        }
+        
+        return buttonRow;
+    }
+    
+    // ✨ 새로운 헬퍼 메서드: 개별 버튼 생성
+    private JButton createSlideButton(ESlideButton buttonType) {
+        JButton button = new JButton(buttonType.getText());
+        button.setPreferredSize(buttonType.getSize());
+        button.setActionCommand(buttonType.getActionCommand());
+        button.addActionListener(new SlideActionHandler());
+        return button;
     }
 
     public void refreshThumbnails() {
@@ -135,7 +151,6 @@ public class GSlideThumbnailPanel extends JPanel {
         thumbnailContainer.repaint();
     }
     
-
     public void onThumbnailClicked(int slideIndex) {
         if (slideManager != null) {
             slideManager.switchToSlide(slideIndex);
@@ -144,7 +159,6 @@ public class GSlideThumbnailPanel extends JPanel {
         }
     }
     
-
     private void updateSelection() {
         for (int i = 0; i < thumbnailItems.size(); i++) {
             ThumbnailItem item = thumbnailItems.get(i);
@@ -152,7 +166,6 @@ public class GSlideThumbnailPanel extends JPanel {
         }
     }
     
-
     private class SlideActionHandler implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
