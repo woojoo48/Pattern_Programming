@@ -3,8 +3,15 @@ package global;
 public class GConstants {
 	//final = 한번 할당되면 변하지 않는 상수임을 정의
 	public final class GMainFrame {
-		public static final  int SCREEN_WIDTH = 400;
-		public static final  int SCREEN_HEIGHT = 400;
+		public static final  int SCREEN_WIDTH = 1200;  // 400 → 1200으로 변경
+		public static final  int SCREEN_HEIGHT = 800;  // 400 → 800으로 변경
+	}
+	
+	// 슬라이드 패널 관련 상수 추가
+	public final class GSlidePanel {
+	    public static final int PANEL_WIDTH = 250;          // 썸네일 패널 너비
+	    public static final int THUMBNAIL_WIDTH = 150;      // 개별 썸네일 너비
+	    public static final int THUMBNAIL_HEIGHT = 100;     // 개별 썸네일 높이
 	}
 	
 	public final class GFileMenu {
