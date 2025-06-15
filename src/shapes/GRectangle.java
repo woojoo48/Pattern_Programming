@@ -27,4 +27,12 @@ public class GRectangle extends GShape{
 	@Override
 	public void addPoint(int x, int y) {
 	}
+	
+	@Override
+	public GShape clone() {
+		GRectangle cloned = new GRectangle();
+		cloned.rectangle.setFrame(this.rectangle.getFrame());
+		copyPropertiesTo(cloned);
+		return cloned;
+	}
 }

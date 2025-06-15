@@ -13,7 +13,6 @@ public class GConstants {
     }
     
     public final class GFileMenu {
-        // ✨ 프레젠테이션 파일로 변경
         public static final String DEFAULT_FILE_EXTENSTION = "Presentation Files (*.presentation)";
         public static final String DEFAULT_FILE_EXTENSTION_TYPE = "presentation";
         public static final String DEFAULT_FILE_NAME = "presentation.presentation";
@@ -33,15 +32,16 @@ public class GConstants {
     }
     
     public enum EEditMenuItem {
-        // Undo/Redo (첫 번째 그룹)
         eUndo("실행 취소", "undo"),
         eRedo("다시 실행", "redo"),
         
-        // 그룹화 (두 번째 그룹) - eGroup 앞에 구분선
+        eCopy("복사", "copySelectedShapes"),
+        ePaste("붙여넣기", "pasteShapes"),
+        eDelete("삭제", "deleteSelectedShapes"),
+        
         eGroup("그룹화", "group"),
         eUngroup("그룹 해제", "ungroup"),
         
-        // 도형 순서 변경 (세 번째 그룹) - eBringToFront 앞에 구분선
         eBringToFront("맨 앞으로 가져오기", "bringToFront"),
         eSendToBack("맨 뒤로 보내기", "sendToBack"),
         eBringForward("앞으로 가져오기", "bringForward"),

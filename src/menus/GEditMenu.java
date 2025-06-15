@@ -15,7 +15,6 @@ import slideFrame.GSlideManager;
 public class GEditMenu extends JMenu {
     private static final long serialVersionUID = 1L;
 
-    // association
     private GSlideManager slideManager;
     
     public GEditMenu() {
@@ -23,10 +22,10 @@ public class GEditMenu extends JMenu {
         
         ActionHandler actionHandler = new ActionHandler();
         
-        // ✨ FileMenu처럼 enum을 활용한 깔끔한 구조
         for(EEditMenuItem eMenuItem : EEditMenuItem.values()) {
-            // 구분선 추가 (특정 항목들 사이에)
-            if (eMenuItem == EEditMenuItem.eGroup || eMenuItem == EEditMenuItem.eBringToFront) {
+            if (eMenuItem == EEditMenuItem.eCopy || 
+                eMenuItem == EEditMenuItem.eGroup || 
+                eMenuItem == EEditMenuItem.eBringToFront) {
                 this.add(new JSeparator());
             }
             
@@ -38,17 +37,13 @@ public class GEditMenu extends JMenu {
     }
 
     public void initialize() {
-        // 초기화 작업
     }
     
     public void associate(GSlideManager slideManager) {
         this.slideManager = slideManager;
     }
     
-    // ===== Undo/Redo 메서드들 =====
-    
     public void undo() {
-        System.out.println("실행 취소");
         GDrawingPanel currentPanel = slideManager.getCurrentDrawingPanel();
         if (currentPanel != null) {
             currentPanel.undo();
@@ -56,17 +51,34 @@ public class GEditMenu extends JMenu {
     }
     
     public void redo() {
-        System.out.println("다시 실행");
         GDrawingPanel currentPanel = slideManager.getCurrentDrawingPanel();
         if (currentPanel != null) {
             currentPanel.redo();
         }
     }
     
-    // ===== 그룹화 메서드들 =====
+    public void copySelectedShapes() {
+        GDrawingPanel currentPanel = slideManager.getCurrentDrawingPanel();
+        if (currentPanel != null) {
+            currentPanel.copySelectedShapes();
+        }
+    }
+    
+    public void pasteShapes() {
+        GDrawingPanel currentPanel = slideManager.getCurrentDrawingPanel();
+        if (currentPanel != null) {
+            currentPanel.pasteShapes();
+        }
+    }
+    
+    public void deleteSelectedShapes() {
+        GDrawingPanel currentPanel = slideManager.getCurrentDrawingPanel();
+        if (currentPanel != null) {
+            currentPanel.deleteSelectedShapes();
+        }
+    }
     
     public void group() {
-        System.out.println("그룹화");
         GDrawingPanel currentPanel = slideManager.getCurrentDrawingPanel();
         if (currentPanel != null) {
             currentPanel.groupSelectedShapes();
@@ -74,17 +86,13 @@ public class GEditMenu extends JMenu {
     }
     
     public void ungroup() {
-        System.out.println("그룹 해제");
         GDrawingPanel currentPanel = slideManager.getCurrentDrawingPanel();
         if (currentPanel != null) {
             currentPanel.ungroupSelectedShape();
         }
     }
     
-    // ===== 도형 순서 변경 메서드들 =====
-    
     public void bringToFront() {
-        System.out.println("맨 앞으로 가져오기");
         GDrawingPanel currentPanel = slideManager.getCurrentDrawingPanel();
         if (currentPanel != null) {
             currentPanel.bringToFront();
@@ -92,7 +100,6 @@ public class GEditMenu extends JMenu {
     }
     
     public void sendToBack() {
-        System.out.println("맨 뒤로 보내기");
         GDrawingPanel currentPanel = slideManager.getCurrentDrawingPanel();
         if (currentPanel != null) {
             currentPanel.sendToBack();
@@ -100,7 +107,6 @@ public class GEditMenu extends JMenu {
     }
     
     public void bringForward() {
-        System.out.println("앞으로 가져오기");
         GDrawingPanel currentPanel = slideManager.getCurrentDrawingPanel();
         if (currentPanel != null) {
             currentPanel.bringForward();
@@ -108,14 +114,11 @@ public class GEditMenu extends JMenu {
     }
     
     public void sendBackward() {
-        System.out.println("뒤로 보내기");
         GDrawingPanel currentPanel = slideManager.getCurrentDrawingPanel();
         if (currentPanel != null) {
             currentPanel.sendBackward();
         }
     }
-    
-    // ===== ✨ FileMenu와 동일한 패턴의 ActionHandler =====
     
     private void invokeMethod(String methodName) {
         try {

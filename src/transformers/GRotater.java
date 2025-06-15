@@ -2,7 +2,9 @@ package transformers;
 
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
-
+import java.awt.geom.AffineTransform;
+import java.util.HashMap;
+import java.util.Map;
 import shapes.GShape;
 
 public class GRotater extends GTransformer {
@@ -11,27 +13,31 @@ public class GRotater extends GTransformer {
     private double cx, cy;  
     private double op;
     
+    private Map<GShape, AffineTransform> beforeTransforms;
+    private Map<GShape, AffineTransform> afterTransforms;
+    
     public GRotater(GShape shape) {
         super(shape);
         this.shape = shape;
+        this.beforeTransforms = new HashMap<>();
+        this.afterTransforms = new HashMap<>();
     }
 
     @Override
     public void start(Graphics2D g2d, int x, int y) {
+        saveBeforeStates();
+        
         if (shape.isGrouped() && groupShapes != null) {
-            // ✨ 그룹화된 경우 그룹 전체의 중심점 계산
             Rectangle groupBounds = getGroupBounds(shape.getGroupId());
             if (groupBounds != null) {
                 this.cx = groupBounds.getCenterX();
                 this.cy = groupBounds.getCenterY();
             } else {
-                // Fallback: 개별 도형 중심점
                 Rectangle bounds = this.shape.getBounds();
                 this.cx = bounds.getCenterX();
                 this.cy = bounds.getCenterY();
             }
         } else {
-            // 개별 도형의 중심점
             Rectangle bounds = this.shape.getBounds();
             this.cx = bounds.getCenterX();
             this.cy = bounds.getCenterY();
@@ -39,13 +45,46 @@ public class GRotater extends GTransformer {
 
         this.op = Math.atan2(y - cy, x - cx);
     }
+    
+    private void saveBeforeStates() {
+        beforeTransforms.clear();
+        
+        if (shape.isGrouped() && groupShapes != null) {
+            int groupId = shape.getGroupId();
+            for (GShape s : groupShapes) {
+                if (s.getGroupId() == groupId) {
+                    beforeTransforms.put(s, (AffineTransform) s.getAffineTransform().clone());
+                }
+            }
+        } else {
+            beforeTransforms.put(shape, (AffineTransform) shape.getAffineTransform().clone());
+        }
+    }
+    
+    private void saveAfterStates() {
+        afterTransforms.clear();
+        
+        if (shape.isGrouped() && groupShapes != null) {
+            int groupId = shape.getGroupId();
+            for (GShape s : groupShapes) {
+                if (s.getGroupId() == groupId) {
+                    afterTransforms.put(s, (AffineTransform) s.getAffineTransform().clone());
+                }
+            }
+        } else {
+            afterTransforms.put(shape, (AffineTransform) shape.getAffineTransform().clone());
+        }
+    }
 
     @Override
     public void drag(Graphics2D g2d, int x, int y) {
+        if (beforeTransforms.isEmpty()) {
+            return;
+        }
+        
         double rp = Math.atan2(y - cy, x - cx);
         double dp = rp - op;
 
-        // 각도 점프 방지
         if (dp > Math.PI) {
             dp -= 2 * Math.PI;
         } else if (dp < -Math.PI) {
@@ -53,26 +92,31 @@ public class GRotater extends GTransformer {
         }
         
         if (shape.isGrouped() && groupShapes != null) {
-            // ✨ 그룹 전체 회전
             rotateGroup(shape.getGroupId(), dp);
         } else {
-            // 개별 도형 회전
             rotateSingleShape(shape, dp);
         }
         
         this.op = rp;
     }
     
-    // ✨ 개별 도형 회전
+    @Override
+    protected void finishTransform(Graphics2D g2d, int x, int y) {
+        saveAfterStates();
+    }
+    
+    @Override
+    protected boolean shouldSaveToHistory() {
+        return !beforeTransforms.isEmpty() && !afterTransforms.isEmpty();
+    }
+    
     private void rotateSingleShape(GShape shape, double angle) {
         shape.getAffineTransform().translate(cx, cy);
         shape.getAffineTransform().rotate(angle);
         shape.getAffineTransform().translate(-cx, -cy);
     }
     
-    // ✨ 그룹 전체 회전
     private void rotateGroup(int groupId, double angle) {
-        // 그룹의 모든 도형에 같은 회전 적용
         for (GShape s : groupShapes) {
             if (s.getGroupId() == groupId) {
                 s.getAffineTransform().translate(cx, cy);
@@ -82,7 +126,6 @@ public class GRotater extends GTransformer {
         }
     }
     
-    // ✨ 그룹 전체 경계 계산
     private Rectangle getGroupBounds(int groupId) {
         Rectangle bounds = null;
         for (GShape s : groupShapes) {
@@ -99,10 +142,21 @@ public class GRotater extends GTransformer {
     }
 
     @Override
-    public void finish(Graphics2D g2d, int x, int y) {
-    }
-
-    @Override
     public void addPoint(Graphics2D graphics, int x, int y) {
     }
+    
+    @Override
+    public void execute() {
+        for (Map.Entry<GShape, AffineTransform> entry : afterTransforms.entrySet()) {
+            entry.getKey().getAffineTransform().setTransform(entry.getValue());
+        }
+    }
+    
+    @Override
+    public void undo() {
+        for (Map.Entry<GShape, AffineTransform> entry : beforeTransforms.entrySet()) {
+            entry.getKey().getAffineTransform().setTransform(entry.getValue());
+        }
+    }
+    
 }

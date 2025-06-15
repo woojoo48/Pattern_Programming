@@ -29,4 +29,12 @@ public class GEllipse extends GShape {
     @Override
     public void addPoint(int x, int y) {
     }
+    
+    @Override
+    public GShape clone() {
+        GEllipse cloned = new GEllipse();
+        cloned.ellipse.setFrame(this.ellipse.getFrame());
+        copyPropertiesTo(cloned);
+        return cloned;
+    }
 }

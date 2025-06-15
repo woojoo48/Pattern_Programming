@@ -26,4 +26,12 @@ public class GLine extends GShape {
     @Override
     public void addPoint(int x, int y) {
     }
+    
+    @Override
+    public GShape clone() {
+        GLine cloned = new GLine();
+        cloned.line.setLine(this.line.x1, this.line.y1, this.line.x2, this.line.y2);
+        copyPropertiesTo(cloned);
+        return cloned;
+    }
 }

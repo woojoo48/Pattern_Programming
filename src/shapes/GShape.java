@@ -10,7 +10,7 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
 import java.io.Serializable;
 
-public abstract  class GShape implements Serializable{
+public abstract class GShape implements Serializable{
 	private static final long serialVersionUID = 1L;
 	private final static int ANCHOR_W = 10;
 	private final static int ANCHOR_H = 10;
@@ -47,9 +47,7 @@ public abstract  class GShape implements Serializable{
 	private boolean bSelected;
 	private EAnchor eSelectedAnchor;
 	private AffineTransform affineTransform;
-	
-	// ✨ 간단한 그룹화를 위한 groupId 추가
-	private int groupId = -1;  // -1이면 그룹화 안됨, 양수면 그룹 ID
+	private int groupId = -1;
 	
 	public GShape(Shape shape) {
 		this.shape = shape;
@@ -64,7 +62,6 @@ public abstract  class GShape implements Serializable{
 		this.eSelectedAnchor = null;
 	}
 	
-	//Getter and Setter
 	public AffineTransform getAffineTransform() {
 		return this.affineTransform;
 	}
@@ -93,7 +90,6 @@ public abstract  class GShape implements Serializable{
 		return this.shape.getBounds();
 	}
 	
-	// ✨ 그룹화 관련 메서드들
 	public int getGroupId() {
 		return this.groupId;
 	}
@@ -106,35 +102,42 @@ public abstract  class GShape implements Serializable{
 		return this.groupId != -1;
 	}
 	
-	//methods
-		private void setAnchors() {
-			Rectangle bounds = this.shape.getBounds();
-		    
-			int bx = bounds.x;
-			int by = bounds.y;
-			int bw = bounds.width;
-			int bh = bounds.height;
-			
-			int cx=0;
-			int cy=0;
-			for(int i = 0;i<this.anchors.length;i++) {
-				switch(EAnchor.values()[i]) {
-				case eSS: cx = bx+bw/2; cy = by+bh; 	break;
-				case eSE: cx = bx+bw; 	cy = by+bh; 	break;
-				case eSW: cx = bx; 		cy = by+bh; 	break;
-				case eNN: cx = bx+bw/2; cy = by; 		break;
-				case eNE: cx = bx+bw; 	cy = by; 		break;
-				case eNW: cx = bx; 		cy = by; 		break;
-				case eEE: cx = bx+bw; 	cy = by+bh/2; 	break;
-				case eWW: cx = bx; 		cy = by+bh/2; 	break;
-				case eRR: cx = bx+bw/2; cy = by-30;		break;
-				default: break;
-				}
-				anchors[i].setFrame(cx-ANCHOR_W/2,cy-ANCHOR_H/2,ANCHOR_W,ANCHOR_H);
-
-			}
-		}
+	public abstract GShape clone();
 	
+	protected void copyPropertiesTo(GShape target) {
+		target.affineTransform = (AffineTransform) this.affineTransform.clone();
+		target.groupId = this.groupId;
+		target.bSelected = false;
+	}
+	
+	private void setAnchors() {
+		Rectangle bounds = this.shape.getBounds();
+	    
+		int bx = bounds.x;
+		int by = bounds.y;
+		int bw = bounds.width;
+		int bh = bounds.height;
+		
+		int cx=0;
+		int cy=0;
+		for(int i = 0;i<this.anchors.length;i++) {
+			switch(EAnchor.values()[i]) {
+			case eSS: cx = bx+bw/2; cy = by+bh; 	break;
+			case eSE: cx = bx+bw; 	cy = by+bh; 	break;
+			case eSW: cx = bx; 		cy = by+bh; 	break;
+			case eNN: cx = bx+bw/2; cy = by; 		break;
+			case eNE: cx = bx+bw; 	cy = by; 		break;
+			case eNW: cx = bx; 		cy = by; 		break;
+			case eEE: cx = bx+bw; 	cy = by+bh/2; 	break;
+			case eWW: cx = bx; 		cy = by+bh/2; 	break;
+			case eRR: cx = bx+bw/2; cy = by-30;		break;
+			default: break;
+			}
+			anchors[i].setFrame(cx-ANCHOR_W/2,cy-ANCHOR_H/2,ANCHOR_W,ANCHOR_H);
+
+		}
+	}
+
 	public void draw(Graphics2D graphics2D) {
 		Shape transformedShape = this.affineTransform.createTransformedShape(shape);
 		graphics2D.draw(transformedShape);
@@ -186,9 +189,7 @@ public abstract  class GShape implements Serializable{
 		return this.shape.contains(shape.getShape().getBounds());
 	}
 	
-	//draw method
 	public abstract void setPoint(int x, int y);
 	public abstract void addPoint(int x, int y);
 	public abstract void dragPoint(int x, int y);
-
 }
