@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -11,7 +13,11 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.util.Vector;
 
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JSeparator;
+import javax.swing.SwingUtilities;
 
 import commands.CommandManager;
 import commands.CopyCommand;
@@ -20,6 +26,8 @@ import commands.GroupCommand;
 import commands.PasteCommand;
 import commands.UngroupCommand;
 import frames.GShapeToolBar.EShapeTool;
+import global.GConstants.EEditMenuItem;
+import shapes.GRectangle;
 import shapes.GShape;
 import shapes.GShape.EAnchor;
 import shapes.GShape.EPoints;
@@ -50,6 +58,8 @@ public class GDrawingPanel extends JPanel {
     private Vector<GShape> clipboard;
     private int nextGroupId = 1;
     
+    private JPopupMenu contextMenu;
+    
     public GDrawingPanel() {
         this.setBackground(Color.WHITE);
         
@@ -72,6 +82,8 @@ public class GDrawingPanel extends JPanel {
         
         this.commandManager = new CommandManager();
         this.clipboard = new Vector<GShape>();
+        
+        this.contextMenu = createContextMenu();
     }
 
     public void initialize() {
@@ -79,6 +91,84 @@ public class GDrawingPanel extends JPanel {
         this.commandManager.clear();
         this.requestFocusInWindow();
         this.repaint();
+    }
+    
+    private JPopupMenu createContextMenu() {
+        JPopupMenu popup = new JPopupMenu();
+        ContextMenuHandler handler = new ContextMenuHandler();
+        
+        for (EEditMenuItem menuItem : EEditMenuItem.values()) {
+            if (menuItem == EEditMenuItem.eCopy || 
+                menuItem == EEditMenuItem.eGroup || 
+                menuItem == EEditMenuItem.eBringToFront) {
+                popup.add(new JSeparator());
+            }
+            
+            JMenuItem item = new JMenuItem(menuItem.getName());
+            item.setActionCommand(menuItem.name());
+            item.addActionListener(handler);
+            popup.add(item);
+        }
+        
+        return popup;
+    }
+    
+    private void showContextMenu(int x, int y) {
+        updateContextMenuState();
+        contextMenu.show(this, x, y);
+    }
+    
+    private void updateContextMenuState() {
+        for (int i = 0; i < contextMenu.getComponentCount(); i++) {
+            if (contextMenu.getComponent(i) instanceof JMenuItem) {
+                JMenuItem item = (JMenuItem) contextMenu.getComponent(i);
+                String command = item.getActionCommand();
+                
+                if (command != null) {
+                    EEditMenuItem menuType = EEditMenuItem.valueOf(command);
+                    item.setEnabled(isMenuItemEnabled(menuType));
+                }
+            }
+        }
+    }
+    
+    private boolean isMenuItemEnabled(EEditMenuItem menuType) {
+        switch (menuType) {
+            case eUndo: return canUndo();
+            case eRedo: return canRedo();
+            case eCopy: return canCopy();
+            case ePaste: return canPaste();
+            case eDelete: return canDelete();
+            case eGroup: return canGroup();
+            case eUngroup: return canUngroup();
+            case eBringToFront:
+            case eSendToBack:
+            case eBringForward:
+            case eSendBackward: 
+                return selectedShape != null;
+            default: return true;
+        }
+    }
+    
+    private class ContextMenuHandler implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            EEditMenuItem menuItem = EEditMenuItem.valueOf(e.getActionCommand());
+            
+            switch (menuItem) {
+                case eUndo: undo(); break;
+                case eRedo: redo(); break;
+                case eCopy: copySelectedShapes(); break;
+                case ePaste: pasteShapes(); break;
+                case eDelete: deleteSelectedShapes(); break;
+                case eGroup: groupSelectedShapes(); break;
+                case eUngroup: ungroupSelectedShape(); break;
+                case eBringToFront: bringToFront(); break;
+                case eSendToBack: sendToBack(); break;
+                case eBringForward: bringForward(); break;
+                case eSendBackward: sendBackward(); break;
+            }
+        }
     }
     
     public Vector<GShape> getShape() {
@@ -347,6 +437,12 @@ public class GDrawingPanel extends JPanel {
             if (clickedShape == null) {
                 if (!isMultiSelect) {
                     clearAllSelection();
+                    // 빈 공간 클릭 시 selection rectangle 시작
+                    currentShape = new GRectangle();
+                    transformer = new GDrawer(currentShape);
+                    transformer.setAllShapes(shapes);
+                    transformer.setCommandManager(commandManager);
+                    transformer.start((Graphics2D) getGraphics(), x, y);
                 }
             } else {
                 selectShapeOrGroup(clickedShape, isMultiSelect);
@@ -393,17 +489,21 @@ public class GDrawingPanel extends JPanel {
             transformer.finish((Graphics2D) getGraphics(), x, y);
             
             if (eShapeTool == EShapeTool.eSelect) {
+                // selection rectangle 처리
                 if (selectedShape == null && transformer instanceof GDrawer) {
-                    shapes.remove(shapes.size() - 1);
+                    shapes.remove(shapes.size() - 1); // selection rectangle 제거
+                    clearAllSelection();
+                    
+                    // selection rectangle 범위 안의 도형들 선택
                     for (GShape shape : shapes) {
-                        if (currentShape != null && currentShape.contains(shape)) {
+                        if (currentShape != null && currentShape.getTransformedShape().intersects(shape.getTransformedShape().getBounds())) {
                             shape.setSelected(true);
-                        } else {
-                            shape.setSelected(false);
+                            selectedShape = shape; // 마지막 선택된 도형을 대표로 설정
                         }
                     }
                 }
             } else {
+                // 새 도형 그리기 완료
                 if (currentShape != null) {
                     clearAllSelection();
                     currentShape.setSelected(true);
@@ -473,6 +573,11 @@ public class GDrawingPanel extends JPanel {
             requestFocusInWindow();
             requestFocus();
             
+            if (SwingUtilities.isRightMouseButton(e)) {
+                showContextMenu(e.getX(), e.getY());
+                return;
+            }
+            
             if (e.getClickCount() == 1) {
                 mouse1Clicked(e);
             } else if (e.getClickCount() == 2) {
@@ -486,7 +591,8 @@ public class GDrawingPanel extends JPanel {
             if (eDrawingState == EDrawingState.eIdle) {
                 if (eShapeTool.getEPoints() == EPoints.e2P) {
                     startTransform(e.getX(), e.getY(), isMultiSelect);
-                    if (!isMultiSelect && selectedShape != null && transformer != null) {
+                    if (!isMultiSelect && (selectedShape != null && transformer != null) || 
+                        (eShapeTool == EShapeTool.eSelect && transformer instanceof GDrawer)) {
                         eDrawingState = EDrawingState.e2P;
                     } else if (!isMultiSelect && eShapeTool != EShapeTool.eSelect) {
                         eDrawingState = EDrawingState.e2P;

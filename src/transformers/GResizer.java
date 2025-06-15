@@ -37,6 +37,10 @@ public class GResizer extends GTransformer{
         Rectangle r = this.shape.getBounds();
         EAnchor eSelectedAnchor = this.shape.getESeletedAnchor();
         
+        if (eSelectedAnchor == null) {
+            eSelectedAnchor = EAnchor.eSE;
+        }
+        
         switch(eSelectedAnchor) {
         case eNW: eResizeAnchor = EAnchor.eSE; cx=r.x+r.width; 		cy= r.y+r.height; 	break;
         case eWW: eResizeAnchor = EAnchor.eEE; cx=r.x+r.width; 		cy= r.y+r.height/2;	break;
@@ -46,7 +50,7 @@ public class GResizer extends GTransformer{
         case eEE: eResizeAnchor = EAnchor.eWW; cx=r.x; 				cy= r.y+r.height/2; break;
         case eNE: eResizeAnchor = EAnchor.eSW; cx=r.x; 				cy= r.y+r.height; 	break;
         case eNN: eResizeAnchor = EAnchor.eSS; cx=r.x+r.width/2; 	cy= r.y+r.height; 	break;
-        default: break;
+        default: eResizeAnchor = EAnchor.eSE; cx=r.x; 				cy= r.y; 			break;
         }
         
         if (shape.isGrouped() && groupShapes != null) {
@@ -61,7 +65,7 @@ public class GResizer extends GTransformer{
                 case eEE: cx = groupBounds.x; 						cy = groupBounds.y + groupBounds.height/2; break;
                 case eNE: cx = groupBounds.x; 						cy = groupBounds.y + groupBounds.height; break;
                 case eNN: cx = groupBounds.x + groupBounds.width/2; cy = groupBounds.y + groupBounds.height; break;
-                default: break;
+                default: cx = groupBounds.x; 						cy = groupBounds.y; break;
                 }
             }
         }
