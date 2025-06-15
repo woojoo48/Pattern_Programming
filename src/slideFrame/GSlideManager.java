@@ -2,6 +2,7 @@ package slideFrame;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
+import java.awt.Color;
 import java.io.Serializable;
 import java.util.Vector;
 
@@ -72,7 +73,7 @@ public class GSlideManager extends JPanel implements Serializable {
 
     private JPanel createSlideContainer() {
         JPanel container = new JPanel();
-        container.setBackground(GConstants.getColor("backgroundColor"));
+        container.setBackground(GConstants.getBackgroundColor());
         return container;
     }
     

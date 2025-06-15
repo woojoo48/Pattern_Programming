@@ -22,7 +22,6 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import frames.GDrawingPanel;
 import global.GConstants;
 import global.GConstants.EFileMenuItem;
-import shapes.GShape;
 import slideFrame.GSlide;
 import slideFrame.GSlideManager;
 
@@ -111,7 +110,7 @@ public class GFileMenu extends JMenu{
     }
     
     public boolean saveAs() {
-        System.out.println(GConstants.getFileMenuLabel("eSaveAs"));
+        System.out.println(GConstants.getFileMenuItemLabel("eSaveAs"));
         
         boolean bCancel = false;
 

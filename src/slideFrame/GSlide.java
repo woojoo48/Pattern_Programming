@@ -27,7 +27,7 @@ public class GSlide implements Serializable {
     public GSlide(String name) {
         this.name = name;
         this.isModified = false;
-        this.backgroundColor = GConstants.getColor("backgroundColor");
+        this.backgroundColor = GConstants.getBackgroundColor();
         this.shapes = new Vector<GShape>();
         this.createDrawingPanel();
     }

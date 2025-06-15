@@ -7,10 +7,10 @@
         <eEditMenu label="Edit"/>
     </EMenu>
     
-    <EFileMenuItem defaultPathName="C:\\Users\\wjddn\\eclipse-workspace\\Pattern_asssignment" 
+    <EFileMenuItem defaultPathName="C:\\Users\\wjddn\\eclipse-workspace\\Pattern_asssignment\\file" 
                    defaultExtension="presentation" 
-                   defaultFileName="presentation.presentation"
-                   extensionFilter="Presentation Files (*.presentation)">
+                   defaultFileName="presentation.gvs"
+                   extensionFilter="Graphics Data (*.gvs)">
         <eNew label="새 파일" methodName="newPanel"/>
         <eOpen label="열기" methodName="open"/>
         <eSave label="저장" methodName="save"/>
@@ -59,7 +59,7 @@
         <saveFailMsg value="저장 실패"/>
         <openCancelMsg value="파일 열기 취소"/>
         <saveCancelMsg value="저장 취소"/>
-        <saveMsg value="파일 저장 중..."/>
+        <saveMsg value="파일 저장 중"/>
         <quitMsg value="프로그램 종료"/>
         <newPanelMsg value="newPanel"/>
     </EFileMessages>

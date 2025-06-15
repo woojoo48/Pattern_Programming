@@ -53,7 +53,7 @@ public class GSlideThumbnailPanel extends JPanel {
         this.thumbnailItems = new Vector<ThumbnailItem>();
         
         this.setLayout(new BorderLayout());
-        this.setBackground(GConstants.getColor("thumbnailPanelBg"));
+        this.setBackground(GConstants.getThumbnailPanelBg());
         this.setPreferredSize(new Dimension(GConstants.getPanelWidth(), 0));
         
         JLabel titleLabel = new JLabel(GConstants.getSlideTitleLabel());
@@ -62,7 +62,7 @@ public class GSlideThumbnailPanel extends JPanel {
 
         this.thumbnailContainer = new JPanel();
         this.thumbnailContainer.setLayout(new BoxLayout(thumbnailContainer, BoxLayout.Y_AXIS));
-        this.thumbnailContainer.setBackground(GConstants.getColor("thumbnailPanelBg"));
+        this.thumbnailContainer.setBackground(GConstants.getThumbnailPanelBg());
         
         this.scrollPane = new JScrollPane(thumbnailContainer);
         this.scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
@@ -84,7 +84,7 @@ public class GSlideThumbnailPanel extends JPanel {
     private JPanel createControlPanel() {
         JPanel controlPanel = new JPanel();
         controlPanel.setLayout(new BoxLayout(controlPanel, BoxLayout.Y_AXIS));
-        controlPanel.setBackground(GConstants.getColor("thumbnailPanelBg"));
+        controlPanel.setBackground(GConstants.getThumbnailPanelBg());
         
         JPanel buttonRow1 = createButtonRow(ESlideButton.eAddSlide, ESlideButton.eRemoveSlide);
         JPanel buttonRow2 = createButtonRow(ESlideButton.ePrevSlide, ESlideButton.eNextSlide);
@@ -97,7 +97,7 @@ public class GSlideThumbnailPanel extends JPanel {
     
     private JPanel createButtonRow(ESlideButton... buttons) {
         JPanel buttonRow = new JPanel(new FlowLayout());
-        buttonRow.setBackground(GConstants.getColor("thumbnailPanelBg"));
+        buttonRow.setBackground(GConstants.getThumbnailPanelBg());
         
         for (ESlideButton buttonType : buttons) {
             JButton button = createSlideButton(buttonType);
