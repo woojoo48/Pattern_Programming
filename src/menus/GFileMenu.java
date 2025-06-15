@@ -35,7 +35,7 @@ public class GFileMenu extends JMenu{
     private JFileChooser fileChooser;
     
     public GFileMenu() {
-        super("File");
+        super(GConstants.getFileMenuLabel());
         
         ActionHandler actionHandler = new ActionHandler();
         for(EFileMenuItem eMenuItem : EFileMenuItem.values()) {
@@ -47,15 +47,15 @@ public class GFileMenu extends JMenu{
     }
 
     public void initialize() {
-        this.dir = new File(GConstants.GFileMenu.DEFAULT_FILE_ROOT);
+        this.dir = new File(GConstants.getDefaultFilePath());
         this.file = null;
         
         this.fileChooser = new JFileChooser(this.dir);
         FileNameExtensionFilter filter = new FileNameExtensionFilter(
-                "Presentation Files (*.presentation)", 
-                "presentation");  // ✨ 확장자 변경
+                GConstants.getExtensionFilter(), 
+                GConstants.getDefaultExtension());
         this.fileChooser.setFileFilter(filter);
-        this.fileChooser.setSelectedFile(new File("presentation.presentation"));
+        this.fileChooser.setSelectedFile(new File(GConstants.getDefaultFileName()));
     }
     
     public void associate(GSlideManager slideManager) {
@@ -66,7 +66,7 @@ public class GFileMenu extends JMenu{
     }
 
     public void newPanel() {
-        System.out.println("newPanel");
+        System.out.println(GConstants.getFileMessage("newPanelMsg"));
         if(this.close()) {
             this.slideManager.newPresentation();
             this.file = null;
@@ -92,11 +92,12 @@ public class GFileMenu extends JMenu{
                     this.slideManager.loadAllSlides(loadedSlides);
                                 
                 } catch (IOException | ClassNotFoundException e) {
-                    System.out.println("파일 열기 실패: " + e.getMessage());
+                    String errorMsg = GConstants.getFileMessage("openFailMsg");
+                    System.out.println(errorMsg.replace("{0}", e.getMessage()));
                     e.printStackTrace();
                 }
             } else {
-                System.out.println("파일 열기 취소");
+                System.out.println(GConstants.getFileMessage("openCancelMsg"));
             }
         }
     }
@@ -110,7 +111,7 @@ public class GFileMenu extends JMenu{
     }
     
     public boolean saveAs() {
-        System.out.println("다른 이름으로 저장");
+        System.out.println(GConstants.getFileMenuLabel("eSaveAs"));
         
         boolean bCancel = false;
 
@@ -119,20 +120,21 @@ public class GFileMenu extends JMenu{
         if(result == JFileChooser.APPROVE_OPTION) {
             this.loadFileChooser();
             
-            if (!file.getName().toLowerCase().endsWith(".presentation")) {
-                file = new File(file.getAbsolutePath() + ".presentation");
+            String extension = "." + GConstants.getDefaultExtension();
+            if (!file.getName().toLowerCase().endsWith(extension)) {
+                file = new File(file.getAbsolutePath() + extension);
             }
             bCancel = this.saveToFile();
         } else {
             bCancel = true;
-            System.out.println("저장 취소");
+            System.out.println(GConstants.getFileMessage("saveCancelMsg"));
         }
         return bCancel;
     }
     
     private boolean saveToFile() {
         try {
-            System.out.println("파일 저장 중...");
+            System.out.println(GConstants.getFileMessage("saveMsg"));
             
             Vector<GSlide> allSlides = this.slideManager.getAllSlides();
             
@@ -146,14 +148,14 @@ public class GFileMenu extends JMenu{
             this.slideManager.setModified(false);
             return false;
         } catch (IOException e) {
-            System.out.println("저장 실패");
+            System.out.println(GConstants.getFileMessage("saveFailMsg"));
             e.printStackTrace();
             return true;
         }
     }
     
     public void quit() {
-        System.out.println("프로그램 종료");
+        System.out.println(GConstants.getFileMessage("quitMsg"));
         if(this.close()) {
             System.exit(0);
         }
@@ -165,7 +167,7 @@ public class GFileMenu extends JMenu{
         if(this.slideManager.isModified()) {
             int reply = JOptionPane.showConfirmDialog(
                 this.slideManager, 
-                "변경내용을 저장 할까요?"
+                GConstants.getFileMessage("saveConfirmMsg")
             );
             if(reply == JOptionPane.CANCEL_OPTION) {
                 bCancel = true;
@@ -181,7 +183,6 @@ public class GFileMenu extends JMenu{
         this.file = this.fileChooser.getSelectedFile();
     }
     
-    // ActionHandler
     private void invokeMethod(String methodName) {
         try {
             this.getClass().getMethod(methodName).invoke(this);

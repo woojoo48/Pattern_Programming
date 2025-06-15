@@ -8,6 +8,7 @@ import java.io.Serializable;
 import java.util.Vector;
 
 import frames.GDrawingPanel;
+import global.GConstants;
 import shapes.GShape;
 
 public class GSlide implements Serializable {
@@ -20,19 +21,17 @@ public class GSlide implements Serializable {
     private Vector<GShape> shapes;
     
     public GSlide() {
-        this("새 슬라이드");
+        this(GConstants.getSlideName("newSlideName"));
     }
     
     public GSlide(String name) {
         this.name = name;
         this.isModified = false;
-        this.backgroundColor = Color.WHITE;
+        this.backgroundColor = GConstants.getColor("backgroundColor");
         this.shapes = new Vector<GShape>();
         this.createDrawingPanel();
     }
     
-
-
     private void createDrawingPanel() {
         this.drawingPanel = new GDrawingPanel();
         this.drawingPanel.initialize();

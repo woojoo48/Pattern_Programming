@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GConstants>
+    <EMainFrame eX="0" eY="0" eW="1200" eH="800"/>
+    
+    <EMenu>
+        <eFileMenu label="File"/>
+        <eEditMenu label="Edit"/>
+    </EMenu>
+    
+    <EFileMenuItem defaultPathName="C:\\Users\\wjddn\\eclipse-workspace\\Pattern_asssignment" 
+                   defaultExtension="presentation" 
+                   defaultFileName="presentation.presentation"
+                   extensionFilter="Presentation Files (*.presentation)">
+        <eNew label="새 파일" methodName="newPanel"/>
+        <eOpen label="열기" methodName="open"/>
+        <eSave label="저장" methodName="save"/>
+        <eSaveAs label="다른 이름으로 저장" methodName="saveAs"/>
+        <eQuit label="종료" methodName="quit"/>
+    </EFileMenuItem>
+    
+    <EEditMenuItem>
+        <eUndo label="실행 취소" methodName="undo"/>
+        <eRedo label="다시 실행" methodName="redo"/>
+        <eCopy label="복사" methodName="copySelectedShapes"/>
+        <ePaste label="붙여넣기" methodName="pasteShapes"/>
+        <eDelete label="삭제" methodName="deleteSelectedShapes"/>
+        <eGroup label="그룹화" methodName="group"/>
+        <eUngroup label="그룹 해제" methodName="ungroup"/>
+        <eBringToFront label="맨 앞으로 가져오기" methodName="bringToFront"/>
+        <eSendToBack label="맨 뒤로 보내기" methodName="sendToBack"/>
+        <eBringForward label="앞으로 가져오기" methodName="bringForward"/>
+        <eSendBackward label="뒤로 보내기" methodName="sendBackward"/>
+    </EEditMenuItem>
+    
+    <EShapeTool>
+        <eSelect label="select"/>
+        <eRectangle label="rectangle"/>
+        <eEllipse label="ellipse"/>
+        <eLine label="line"/>
+        <ePolygon label="polygon"/>
+    </EShapeTool>
+    
+    <ESlidePanel panelWidth="250" thumbnailWidth="150" thumbnailHeight="100" titleLabel="슬라이드">
+        <eAddSlide text="+" width="40" height="30" actionCommand="ADD_SLIDE"/>
+        <eRemoveSlide text="-" width="40" height="30" actionCommand="REMOVE_SLIDE"/>
+        <ePrevSlide text="이전" width="60" height="30" actionCommand="PREV_SLIDE"/>
+        <eNextSlide text="다음" width="60" height="30" actionCommand="NEXT_SLIDE"/>
+    </ESlidePanel>
+    
+    <ESlideNames>
+        <defaultSlideName value="슬라이드"/>
+        <newSlideName value="새 슬라이드"/>
+        <slideNumberFormat value="슬라이드 {0}"/>
+    </ESlideNames>
+    
+    <EFileMessages>
+        <saveConfirmMsg value="변경내용을 저장 할까요?"/>
+        <openFailMsg value="파일 열기 실패: {0}"/>
+        <saveFailMsg value="저장 실패"/>
+        <openCancelMsg value="파일 열기 취소"/>
+        <saveCancelMsg value="저장 취소"/>
+        <saveMsg value="파일 저장 중..."/>
+        <quitMsg value="프로그램 종료"/>
+        <newPanelMsg value="newPanel"/>
+    </EFileMessages>
+    
+    <ETransformer>
+        <pasteOffset value="20"/>
+        <anchorSize width="10" height="10"/>
+        <rotationHandleOffset value="-30"/>
+    </ETransformer>
+    
+    <ECommand>
+        <maxHistorySize value="100"/>
+    </ECommand>
+    
+    <EColors>
+        <backgroundColor r="255" g="255" b="255"/>
+        <thumbnailPanelBg r="240" g="240" b="240"/>
+        <selectedThumbnailBg r="200" g="220" b="255"/>
+        <thumbnailHoverBg r="230" g="230" b="230"/>
+        <thumbnailBorderSelected r="0" g="0" b="255"/>
+        <anchorFillColor r="255" g="255" b="255"/>
+        <thumbnailBorder r="192" g="192" b="192"/>
+        <slideNumberColor r="64" g="64" b="64"/>
+    </EColors>
+    
+    <EFonts>
+        <slideNumberFont family="Arial" style="1" size="32"/>
+    </EFonts>
+    
+    <EKeyBindings>
+        <delete key="VK_DELETE"/>
+        <deleteAlt key="VK_BACK_SPACE"/>
+        <copy key="VK_C" modifier="CTRL"/>
+        <paste key="VK_V" modifier="CTRL"/>
+        <undo key="VK_Z" modifier="CTRL"/>
+        <redo key="VK_Y" modifier="CTRL"/>
+    </EKeyBindings>
+    
+    <EMouse>
+        <doubleClickThreshold value="2"/>
+        <singleClickThreshold value="1"/>
+    </EMouse>
+    
+    <EUITexts>
+        <projectName value="Pattern_asssignment"/>
+        <slideContainerBackground value="WHITE"/>
+        <contextMenuSeparator value="true"/>
+    </EUITexts>
+</GConstants>

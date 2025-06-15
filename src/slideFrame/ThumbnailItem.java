@@ -30,22 +30,22 @@ public class ThumbnailItem extends JPanel {
         this.isSelected = false;
         
         this.setPreferredSize(new Dimension(
-            GConstants.GSlidePanel.THUMBNAIL_WIDTH, 
-            GConstants.GSlidePanel.THUMBNAIL_HEIGHT + 20
+            GConstants.getThumbnailWidth(), 
+            GConstants.getThumbnailHeight() + 20
         ));
         this.setMaximumSize(new Dimension(
-            GConstants.GSlidePanel.THUMBNAIL_WIDTH, 
-            GConstants.GSlidePanel.THUMBNAIL_HEIGHT + 20
+            GConstants.getThumbnailWidth(), 
+            GConstants.getThumbnailHeight() + 20
         ));
         this.setLayout(new BorderLayout());
-        this.setBackground(Color.WHITE);
+        this.setBackground(GConstants.getColor("backgroundColor"));
         this.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         
         this.slideNumberLabel = new JLabel(String.valueOf(slideIndex + 1));
         slideNumberLabel.setHorizontalAlignment(SwingConstants.CENTER);
         slideNumberLabel.setVerticalAlignment(SwingConstants.CENTER);
-        slideNumberLabel.setFont(new Font("Arial", Font.BOLD, 32));
-        slideNumberLabel.setForeground(Color.DARK_GRAY);
+        slideNumberLabel.setFont(GConstants.getFont("slideNumberFont"));
+        slideNumberLabel.setForeground(GConstants.getColor("slideNumberColor"));
         this.add(slideNumberLabel, BorderLayout.CENTER);
         
         this.addMouseListener(new MouseAdapter() {
@@ -59,14 +59,14 @@ public class ThumbnailItem extends JPanel {
             @Override
             public void mouseEntered(MouseEvent e) {
                 if (!isSelected) {
-                    setBackground(new Color(230, 230, 230));
+                    setBackground(GConstants.getColor("thumbnailHoverBg"));
                 }
             }
             
             @Override
             public void mouseExited(MouseEvent e) {
                 if (!isSelected) {
-                    setBackground(Color.WHITE);
+                    setBackground(GConstants.getColor("backgroundColor"));
                 }
             }
         });
@@ -79,10 +79,10 @@ public class ThumbnailItem extends JPanel {
     public void setSelected(boolean selected) {
         this.isSelected = selected;
         if (selected) {
-            this.setBackground(new Color(200, 220, 255));
-            this.setBorder(BorderFactory.createLineBorder(Color.BLUE, 2));
+            this.setBackground(GConstants.getColor("selectedThumbnailBg"));
+            this.setBorder(BorderFactory.createLineBorder(GConstants.getColor("thumbnailBorderSelected"), 2));
         } else {
-            this.setBackground(Color.WHITE);
+            this.setBackground(GConstants.getColor("backgroundColor"));
             this.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         }
         this.repaint();
@@ -94,10 +94,10 @@ public class ThumbnailItem extends JPanel {
         
         int thumbX = 10;
         int thumbY = 10;
-        int thumbWidth = GConstants.GSlidePanel.THUMBNAIL_WIDTH - 20;
-        int thumbHeight = GConstants.GSlidePanel.THUMBNAIL_HEIGHT - 30;
+        int thumbWidth = GConstants.getThumbnailWidth() - 20;
+        int thumbHeight = GConstants.getThumbnailHeight() - 30;
         
-        g.setColor(Color.LIGHT_GRAY);
+        g.setColor(GConstants.getColor("thumbnailBorder"));
         g.drawRect(thumbX, thumbY, thumbWidth, thumbHeight);
     }
 }

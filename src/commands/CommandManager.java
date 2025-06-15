@@ -3,10 +3,11 @@ package commands;
 import java.util.ArrayList;
 import java.util.List;
 
+import global.GConstants;
+
 public class CommandManager {
     private List<Command> history;
     private int currentIndex;
-    private static final int MAX_HISTORY = 100;
     
     public CommandManager() {
         this.history = new ArrayList<>();
@@ -28,7 +29,8 @@ public class CommandManager {
         history.add(command);
         currentIndex++;
         
-        if (history.size() > MAX_HISTORY) {
+        int maxHistory = GConstants.getMaxHistorySize();
+        if (history.size() > maxHistory) {
             history.remove(0);
             currentIndex--;
         }

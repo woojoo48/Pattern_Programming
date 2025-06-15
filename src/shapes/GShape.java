@@ -10,10 +10,10 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
 import java.io.Serializable;
 
+import global.GConstants;
+
 public abstract class GShape implements Serializable{
 	private static final long serialVersionUID = 1L;
-	private final static int ANCHOR_W = 10;
-	private final static int ANCHOR_H = 10;
 	
 	public enum EPoints{
 		e2P,
@@ -118,6 +118,10 @@ public abstract class GShape implements Serializable{
 		int bw = bounds.width;
 		int bh = bounds.height;
 		
+		int anchorW = GConstants.getAnchorWidth();
+		int anchorH = GConstants.getAnchorHeight();
+		int rotationOffset = GConstants.getRotationHandleOffset();
+		
 		int cx=0;
 		int cy=0;
 		for(int i = 0;i<this.anchors.length;i++) {
@@ -130,10 +134,10 @@ public abstract class GShape implements Serializable{
 			case eNW: cx = bx; 		cy = by; 		break;
 			case eEE: cx = bx+bw; 	cy = by+bh/2; 	break;
 			case eWW: cx = bx; 		cy = by+bh/2; 	break;
-			case eRR: cx = bx+bw/2; cy = by-30;		break;
+			case eRR: cx = bx+bw/2; cy = by+rotationOffset;		break;
 			default: break;
 			}
-			anchors[i].setFrame(cx-ANCHOR_W/2,cy-ANCHOR_H/2,ANCHOR_W,ANCHOR_H);
+			anchors[i].setFrame(cx-anchorW/2,cy-anchorH/2,anchorW,anchorH);
 
 		}
 	}
@@ -144,6 +148,10 @@ public abstract class GShape implements Serializable{
 		
 		if(bSelected) {
 		    this.setAnchors();
+		    
+		    int anchorW = GConstants.getAnchorWidth();
+		    int anchorH = GConstants.getAnchorHeight();
+		    
 		    for(int i = 0;i<this.anchors.length;i++) {
 		        double anchorCenterX = anchors[i].getCenterX();
 		        double anchorCenterY = anchors[i].getCenterY();
@@ -152,14 +160,14 @@ public abstract class GShape implements Serializable{
 		        Point2D transformedCenter = this.affineTransform.transform(center, null);
 		        
 		        Ellipse2D fixedSizeAnchor = new Ellipse2D.Double(
-		            transformedCenter.getX() - ANCHOR_W/2,
-		            transformedCenter.getY() - ANCHOR_H/2,
-		            ANCHOR_W,
-		            ANCHOR_H
+		            transformedCenter.getX() - anchorW/2,
+		            transformedCenter.getY() - anchorH/2,
+		            anchorW,
+		            anchorH
 		        );
 		        
 		        Color penColor = graphics2D.getColor();
-		        graphics2D.setColor(Color.WHITE);
+		        graphics2D.setColor(GConstants.getAnchorFillColor());
 		        graphics2D.fill(fixedSizeAnchor);
 		        graphics2D.setColor(penColor);
 		        graphics2D.draw(fixedSizeAnchor);

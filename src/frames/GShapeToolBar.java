@@ -8,7 +8,8 @@ import javax.swing.ButtonGroup;
 import javax.swing.JRadioButton;
 import javax.swing.JToolBar;
 
-import slideFrame.GSlideManager;  // 추가!
+import global.GConstants;
+import slideFrame.GSlideManager;
 import shapes.GEllipse;
 import shapes.GLine;
 import shapes.GPolygon;
@@ -20,22 +21,22 @@ public class GShapeToolBar extends JToolBar{
     private static final long serialVersionUID = 1L;
 
     public enum EShapeTool {
-        eSelect("select",EPoints.e2P, GRectangle.class),
-        eRectangle("rectangle",EPoints.e2P, GRectangle.class),
-        eEllipse("ellipse",EPoints.e2P,GEllipse.class),
-        eLine("line",EPoints.e2P,GLine.class),
-        ePolygon("polygon",EPoints.eNP,GPolygon.class);
+        eSelect(EPoints.e2P, GRectangle.class),
+        eRectangle(EPoints.e2P, GRectangle.class),
+        eEllipse(EPoints.e2P, GEllipse.class),
+        eLine(EPoints.e2P, GLine.class),
+        ePolygon(EPoints.eNP, GPolygon.class);
         
-        private String name;
         private EPoints ePoints;
         private Class<? extends GShape> classShape;
-        private EShapeTool(String name,EPoints eDrawingType, Class<? extends GShape> gShape) {
-            this.name = name;
+        
+        private EShapeTool(EPoints eDrawingType, Class<? extends GShape> gShape) {
             this.ePoints = eDrawingType;
             this.classShape = gShape;
         }
+        
         public String getName() {
-            return this.name;
+            return GConstants.getShapeToolLabel(this.name());
         }
         
         public EPoints getEPoints() {

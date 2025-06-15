@@ -9,6 +9,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JSeparator;
 
 import frames.GDrawingPanel;
+import global.GConstants;
 import global.GConstants.EEditMenuItem;
 import slideFrame.GSlideManager;
 
@@ -18,7 +19,7 @@ public class GEditMenu extends JMenu {
     private GSlideManager slideManager;
     
     public GEditMenu() {
-        super("Edit");
+        super(GConstants.getEditMenuLabel());
         
         ActionHandler actionHandler = new ActionHandler();
         

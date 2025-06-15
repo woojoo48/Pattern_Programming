@@ -437,7 +437,6 @@ public class GDrawingPanel extends JPanel {
             if (clickedShape == null) {
                 if (!isMultiSelect) {
                     clearAllSelection();
-                    // 빈 공간 클릭 시 selection rectangle 시작
                     currentShape = new GRectangle();
                     transformer = new GDrawer(currentShape);
                     transformer.setAllShapes(shapes);
@@ -489,21 +488,18 @@ public class GDrawingPanel extends JPanel {
             transformer.finish((Graphics2D) getGraphics(), x, y);
             
             if (eShapeTool == EShapeTool.eSelect) {
-                // selection rectangle 처리
                 if (selectedShape == null && transformer instanceof GDrawer) {
-                    shapes.remove(shapes.size() - 1); // selection rectangle 제거
+                    shapes.remove(shapes.size() - 1);
                     clearAllSelection();
                     
-                    // selection rectangle 범위 안의 도형들 선택
                     for (GShape shape : shapes) {
                         if (currentShape != null && currentShape.getTransformedShape().intersects(shape.getTransformedShape().getBounds())) {
                             shape.setSelected(true);
-                            selectedShape = shape; // 마지막 선택된 도형을 대표로 설정
+                            selectedShape = shape;
                         }
                     }
                 }
             } else {
-                // 새 도형 그리기 완료
                 if (currentShape != null) {
                     clearAllSelection();
                     currentShape.setSelected(true);

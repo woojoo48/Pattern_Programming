@@ -19,14 +19,23 @@ public class GMainFrame extends JFrame {
     private GSlideManager slideManager;
     
     public GMainFrame() {
-        this.setSize(GConstants.GMainFrame.SCREEN_WIDTH, GConstants.GMainFrame.SCREEN_HEIGHT);
+        GConstants.getInstance();
+        this.setSize(GConstants.getScreenWidth(), GConstants.getScreenHeight());
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);        
+        
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         Dimension windowSize = this.getSize();
-        int x = (screenSize.width - windowSize.width) / 2;
-        int y = (screenSize.height - windowSize.height) / 2;
-        x = Math.max(0, x);
-        y = Math.max(0, y);
+        
+        int x = GConstants.getScreenX();
+        int y = GConstants.getScreenY();
+        
+        if (x == 0 && y == 0) {
+            x = (screenSize.width - windowSize.width) / 2;
+            y = (screenSize.height - windowSize.height) / 2;
+            x = Math.max(0, x);
+            y = Math.max(0, y);
+        }
+        
         this.setLocation(x, y);
         
         LayoutManager layout = new BorderLayout();
