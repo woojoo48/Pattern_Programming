@@ -5,6 +5,7 @@
     <EMenu>
         <eFileMenu label="File"/>
         <eEditMenu label="Edit"/>
+        <eShapeMenu label="Shape"/>
     </EMenu>
     
     <EFileMenuItem defaultPathName="C:\\Users\\wjddn\\eclipse-workspace\\Pattern_asssignment\\file" 
@@ -31,6 +32,13 @@
         <eBringForward label="앞으로 가져오기" methodName="bringForward"/>
         <eSendBackward label="뒤로 보내기" methodName="sendBackward"/>
     </EEditMenuItem>
+    
+    <EShapeMenuItem>
+        <eStrokeColor label="경계선 색깔" methodName="setStrokeColor"/>
+        <eFillColor label="채우기 색깔" methodName="setFillColor"/>
+        <eStrokeWidth label="경계선 두께" methodName="setStrokeWidth"/>
+        <eStrokeStyle label="경계선 스타일" methodName="setStrokeStyle"/>
+    </EShapeMenuItem>
     
     <EShapeTool>
         <eSelect label="select"/>
@@ -63,6 +71,41 @@
         <quitMsg value="프로그램 종료"/>
         <newPanelMsg value="newPanel"/>
     </EFileMessages>
+    
+    <EShapeStyle>
+        <defaultStrokeColor r="0" g="0" b="0"/>
+        <defaultFillColor r="255" g="255" b="255"/>
+        <defaultStrokeWidth value="1.0"/>
+        <defaultStrokeStyle value="SOLID"/>
+    </EShapeStyle>
+    
+    <EColorPalette>
+        <red r="255" g="0" b="0" label="빨강"/>
+        <blue r="0" g="0" b="255" label="파랑"/>
+        <green r="0" g="255" b="0" label="초록"/>
+        <yellow r="255" g="255" b="0" label="노랑"/>
+        <orange r="255" g="165" b="0" label="주황"/>
+        <purple r="128" g="0" b="128" label="보라"/>
+        <pink r="255" g="192" b="203" label="분홍"/>
+        <cyan r="0" g="255" b="255" label="하늘"/>
+        <black r="0" g="0" b="0" label="검정"/>
+        <white r="255" g="255" b="255" label="흰색"/>
+        <gray r="128" g="128" b="128" label="회색"/>
+        <lightGray r="211" g="211" b="211" label="연회색"/>
+    </EColorPalette>
+    
+    <EStrokeStyles>
+        <SOLID label="실선"/>
+        <DASHED label="대시선"/>
+        <DOTTED label="점선"/>
+    </EStrokeStyles>
+    
+    <EStrokeWidths>
+        <thin value="1.0" label="얇게"/>
+        <medium value="3.0" label="보통"/>
+        <thick value="5.0" label="두껍게"/>
+        <extraThick value="8.0" label="매우 두껍게"/>
+    </EStrokeWidths>
     
     <ETransformer>
         <pasteOffset value="20"/>
@@ -108,4 +151,15 @@
         <slideContainerBackground value="WHITE"/>
         <contextMenuSeparator value="true"/>
     </EUITexts>
+    
+    <EShapeMessages>
+        <selectShapeFirst value="도형을 선택해주세요."/>
+        <strokeColorTitle value="경계선 색깔 선택"/>
+        <fillColorTitle value="채우기 색깔 선택"/>
+        <colorPaletteTitle value="색깔 팔레트"/>
+        <strokeWidthTitle value="경계선 두께"/>
+        <strokeWidthMessage value="경계선 두께를 선택하세요"/>
+        <strokeStyleTitle value="경계선 스타일"/>
+        <strokeStyleMessage value="경계선 스타일을 선택하세요"/>
+    </EShapeMessages>
 </GConstants>

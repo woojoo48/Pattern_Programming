@@ -24,7 +24,7 @@ public class GConstants {
     
     //loaded data
     private static int screenX, screenY, screenWidth, screenHeight;
-    private static String fileMenuLabel, editMenuLabel;
+    private static String fileMenuLabel, editMenuLabel, shapeMenuLabel;
     private static String defaultFilePath, defaultExtension, defaultFileName, extensionFilter;
     private static int panelWidth, thumbnailWidth, thumbnailHeight;
     private static String slideTitleLabel;
@@ -32,6 +32,8 @@ public class GConstants {
     private static Map<String, String> fileMenuMethods = new HashMap<>();
     private static Map<String, String> editMenuLabels = new HashMap<>();
     private static Map<String, String> editMenuMethods = new HashMap<>();
+    private static Map<String, String> shapeMenuLabels = new HashMap<>();
+    private static Map<String, String> shapeMenuMethods = new HashMap<>();
     private static Map<String, String> shapeToolLabels = new HashMap<>();
     private static Map<String, String> slideButtonTexts = new HashMap<>();
     private static Map<String, Dimension> slideButtonSizes = new HashMap<>();
@@ -44,6 +46,17 @@ public class GConstants {
     private static Map<String, String> keyBindings = new HashMap<>();
     private static Map<String, Integer> mouseSettings = new HashMap<>();
     private static Map<String, String> uiTexts = new HashMap<>();
+    private static Map<String, String> shapeMessages = new HashMap<>();
+    
+    // Shape style settings
+    private static Color defaultStrokeColor, defaultFillColor;
+    private static float defaultStrokeWidth;
+    private static String defaultStrokeStyle;
+    private static Map<String, Color> colorPalette = new HashMap<>();
+    private static Map<String, String> colorPaletteLabels = new HashMap<>();
+    private static Map<String, String> strokeStyleLabels = new HashMap<>();
+    private static Map<String, Float> strokeWidthValues = new HashMap<>();
+    private static Map<String, String> strokeWidthLabels = new HashMap<>();
     
     public static GConstants getInstance() {
         if (instance == null) {
@@ -97,6 +110,9 @@ public class GConstants {
                         case "EEditMenuItem":
                             parseEditMenuItem(node);
                             break;
+                        case "EShapeMenuItem":
+                            parseShapeMenuItem(node);
+                            break;
                         case "EShapeTool":
                             parseShapeTool(node);
                             break;
@@ -108,6 +124,18 @@ public class GConstants {
                             break;
                         case "EFileMessages":
                             parseFileMessages(node);
+                            break;
+                        case "EShapeStyle":
+                            parseShapeStyle(node);
+                            break;
+                        case "EColorPalette":
+                            parseColorPalette(node);
+                            break;
+                        case "EStrokeStyles":
+                            parseStrokeStyles(node);
+                            break;
+                        case "EStrokeWidths":
+                            parseStrokeWidths(node);
                             break;
                         case "ETransformer":
                             parseTransformer(node);
@@ -129,6 +157,9 @@ public class GConstants {
                             break;
                         case "EUITexts":
                             parseUITexts(node);
+                            break;
+                        case "EShapeMessages":
+                            parseShapeMessages(node);
                             break;
                     }
                 }
@@ -160,6 +191,9 @@ public class GConstants {
                         break;
                     case "eEditMenu":
                         editMenuLabel = label;
+                        break;
+                    case "eShapeMenu":
+                        shapeMenuLabel = label;
                         break;
                 }
             }
@@ -197,6 +231,21 @@ public class GConstants {
                 
                 editMenuLabels.put(nodeName, label);
                 editMenuMethods.put(nodeName, methodName);
+            }
+        }
+    }
+    
+    private void parseShapeMenuItem(Node node) {
+        NodeList children = node.getChildNodes();
+        for (int i = 0; i < children.getLength(); i++) {
+            Node child = children.item(i);
+            if (child.getNodeType() == Node.ELEMENT_NODE) {
+                String nodeName = child.getNodeName();
+                String label = getAttributeValue(child, "label", "");
+                String methodName = getAttributeValue(child, "methodName", "");
+                
+                shapeMenuLabels.put(nodeName, label);
+                shapeMenuMethods.put(nodeName, methodName);
             }
         }
     }
@@ -256,6 +305,81 @@ public class GConstants {
                 String nodeName = child.getNodeName();
                 String value = getAttributeValue(child, "value", "");
                 fileMessages.put(nodeName, value);
+            }
+        }
+    }
+    
+    private void parseShapeStyle(Node node) {
+        NodeList children = node.getChildNodes();
+        for (int i = 0; i < children.getLength(); i++) {
+            Node child = children.item(i);
+            if (child.getNodeType() == Node.ELEMENT_NODE) {
+                String nodeName = child.getNodeName();
+                
+                switch (nodeName) {
+                    case "defaultStrokeColor":
+                        int sr = Integer.parseInt(getAttributeValue(child, "r", "0"));
+                        int sg = Integer.parseInt(getAttributeValue(child, "g", "0"));
+                        int sb = Integer.parseInt(getAttributeValue(child, "b", "0"));
+                        defaultStrokeColor = new Color(sr, sg, sb);
+                        break;
+                    case "defaultFillColor":
+                        int fr = Integer.parseInt(getAttributeValue(child, "r", "255"));
+                        int fg = Integer.parseInt(getAttributeValue(child, "g", "255"));
+                        int fb = Integer.parseInt(getAttributeValue(child, "b", "255"));
+                        defaultFillColor = new Color(fr, fg, fb);
+                        break;
+                    case "defaultStrokeWidth":
+                        defaultStrokeWidth = Float.parseFloat(getAttributeValue(child, "value", "1.0"));
+                        break;
+                    case "defaultStrokeStyle":
+                        defaultStrokeStyle = getAttributeValue(child, "value", "SOLID");
+                        break;
+                }
+            }
+        }
+    }
+    
+    private void parseColorPalette(Node node) {
+        NodeList children = node.getChildNodes();
+        for (int i = 0; i < children.getLength(); i++) {
+            Node child = children.item(i);
+            if (child.getNodeType() == Node.ELEMENT_NODE) {
+                String nodeName = child.getNodeName();
+                int r = Integer.parseInt(getAttributeValue(child, "r", "0"));
+                int g = Integer.parseInt(getAttributeValue(child, "g", "0"));
+                int b = Integer.parseInt(getAttributeValue(child, "b", "0"));
+                String label = getAttributeValue(child, "label", nodeName);
+                
+                colorPalette.put(nodeName, new Color(r, g, b));
+                colorPaletteLabels.put(nodeName, label);
+            }
+        }
+    }
+    
+    private void parseStrokeStyles(Node node) {
+        NodeList children = node.getChildNodes();
+        for (int i = 0; i < children.getLength(); i++) {
+            Node child = children.item(i);
+            if (child.getNodeType() == Node.ELEMENT_NODE) {
+                String nodeName = child.getNodeName();
+                String label = getAttributeValue(child, "label", nodeName);
+                strokeStyleLabels.put(nodeName, label);
+            }
+        }
+    }
+    
+    private void parseStrokeWidths(Node node) {
+        NodeList children = node.getChildNodes();
+        for (int i = 0; i < children.getLength(); i++) {
+            Node child = children.item(i);
+            if (child.getNodeType() == Node.ELEMENT_NODE) {
+                String nodeName = child.getNodeName();
+                float value = Float.parseFloat(getAttributeValue(child, "value", "1.0"));
+                String label = getAttributeValue(child, "label", nodeName);
+                
+                strokeWidthValues.put(nodeName, value);
+                strokeWidthLabels.put(nodeName, label);
             }
         }
     }
@@ -331,6 +455,18 @@ public class GConstants {
         }
     }
     
+    private void parseShapeMessages(Node node) {
+        NodeList children = node.getChildNodes();
+        for (int i = 0; i < children.getLength(); i++) {
+            Node child = children.item(i);
+            if (child.getNodeType() == Node.ELEMENT_NODE) {
+                String nodeName = child.getNodeName();
+                String value = getAttributeValue(child, "value", "");
+                shapeMessages.put(nodeName, value);
+            }
+        }
+    }
+    
     private String getAttributeValue(Node node, String attributeName, String defaultValue) {
         Node attr = node.getAttributes().getNamedItem(attributeName);
         return attr != null ? attr.getNodeValue() : defaultValue;
@@ -345,6 +481,7 @@ public class GConstants {
     //menus
     public static String getFileMenuLabel() { return fileMenuLabel; }
     public static String getEditMenuLabel() { return editMenuLabel; }
+    public static String getShapeMenuLabel() { return shapeMenuLabel; }
     
     //file
     public static String getDefaultFilePath() { return defaultFilePath; }
@@ -374,6 +511,10 @@ public class GConstants {
     public static String getEditMenuItemLabel(String key) { return editMenuLabels.get(key); }
     public static String getEditMenuItemMethod(String key) { return editMenuMethods.get(key); }
     
+    //shapemenu
+    public static String getShapeMenuItemLabel(String key) { return shapeMenuLabels.get(key); }
+    public static String getShapeMenuItemMethod(String key) { return shapeMenuMethods.get(key); }
+    
     public static String getShapeToolLabel(String key) { return shapeToolLabels.get(key); }
     
     // 슬라이드 버튼
@@ -384,6 +525,25 @@ public class GConstants {
     public static String getSlideName(String key) { return slideNames.get(key); }
     
     public static String getFileMessage(String key) { return fileMessages.get(key); }
+    
+    // Shape Style getters
+    public static Color getDefaultStrokeColor() { return defaultStrokeColor; }
+    public static Color getDefaultFillColor() { return defaultFillColor; }
+    public static float getDefaultStrokeWidth() { return defaultStrokeWidth; }
+    public static String getDefaultStrokeStyle() { return defaultStrokeStyle; }
+    
+    public static Color getPaletteColor(String key) { return colorPalette.get(key); }
+    public static String getPaletteColorLabel(String key) { return colorPaletteLabels.get(key); }
+    public static Map<String, Color> getAllPaletteColors() { return new HashMap<>(colorPalette); }
+    public static Map<String, String> getAllPaletteColorLabels() { return new HashMap<>(colorPaletteLabels); }
+    
+    public static String getStrokeStyleLabel(String key) { return strokeStyleLabels.get(key); }
+    public static Map<String, String> getAllStrokeStyleLabels() { return new HashMap<>(strokeStyleLabels); }
+    
+    public static float getStrokeWidthValue(String key) { return strokeWidthValues.getOrDefault(key, 1.0f); }
+    public static String getStrokeWidthLabel(String key) { return strokeWidthLabels.get(key); }
+    public static Map<String, Float> getAllStrokeWidthValues() { return new HashMap<>(strokeWidthValues); }
+    public static Map<String, String> getAllStrokeWidthLabels() { return new HashMap<>(strokeWidthLabels); }
     
     public static Color getBackgroundColor() { return colors.get("backgroundColor"); }
     public static Color getThumbnailPanelBg() { return colors.get("thumbnailPanelBg"); }
@@ -402,6 +562,8 @@ public class GConstants {
     public static int getSingleClickThreshold() { return mouseSettings.getOrDefault("singleClickThreshold", 1); }
     
     public static String getUIText(String key) { return uiTexts.get(key); }
+    
+    public static String getShapeMessage(String key) { return shapeMessages.get(key); }
     
     
     public enum EFileMenuItem {
@@ -426,6 +588,18 @@ public class GConstants {
         
         public String getMethodName() {
             return GConstants.getEditMenuItemMethod(this.name());
+        }
+    }
+    
+    public enum EShapeMenuItem {
+        eStrokeColor, eFillColor, eStrokeWidth, eStrokeStyle;
+        
+        public String getName() {
+            return GConstants.getShapeMenuItemLabel(this.name());
+        }
+        
+        public String getMethodName() {
+            return GConstants.getShapeMenuItemMethod(this.name());
         }
     }
 }

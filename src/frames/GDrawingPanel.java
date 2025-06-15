@@ -19,14 +19,11 @@ import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
 import javax.swing.SwingUtilities;
 
-import commands.CommandManager;
-import commands.CopyCommand;
-import commands.DeleteCommand;
-import commands.GroupCommand;
-import commands.PasteCommand;
-import commands.UngroupCommand;
 import frames.GShapeToolBar.EShapeTool;
 import global.GConstants.EEditMenuItem;
+import global.GConstants.EShapeMenuItem;
+import menus.GEditMenu;
+import menus.GShapeMenu;
 import shapes.GRectangle;
 import shapes.GShape;
 import shapes.GShape.EAnchor;
@@ -45,7 +42,7 @@ public class GDrawingPanel extends JPanel {
         e2P,
         eNP
     }
-    
+    //constants
     private Vector<GShape> shapes;
     private GTransformer transformer;
     private GShape currentShape;
@@ -54,12 +51,11 @@ public class GDrawingPanel extends JPanel {
     private EShapeTool eShapeTool;
     private EDrawingState eDrawingState;
     
-    private CommandManager commandManager;
-    private Vector<GShape> clipboard;
-    private int nextGroupId = 1;
-    
     private JPopupMenu contextMenu;
+    private GEditMenu editMenu; 
+    private GShapeMenu shapeMenu;
     
+    //constructor
     public GDrawingPanel() {
         this.setBackground(Color.WHITE);
         
@@ -80,23 +76,39 @@ public class GDrawingPanel extends JPanel {
         this.eDrawingState = EDrawingState.eIdle;
         this.bUpdated = false;
         
-        this.commandManager = new CommandManager();
-        this.clipboard = new Vector<GShape>();
-        
         this.contextMenu = createContextMenu();
     }
 
     public void initialize() {
         this.shapes.clear();
-        this.commandManager.clear();
+        if (this.editMenu != null) {
+            this.editMenu.getCommandManager().clear();
+        }
         this.requestFocusInWindow();
         this.repaint();
+    }
+    //getter and setter
+    
+    public void setEditMenu(GEditMenu editMenu) {
+        this.editMenu = editMenu;
+        updateTransformerCommandManager();
+    }
+    
+    public void setShapeMenu(GShapeMenu shapeMenu) {
+        this.shapeMenu = shapeMenu;
+    }
+    
+    private void updateTransformerCommandManager() {
+        if (transformer != null && editMenu != null) {
+            transformer.setCommandManager(editMenu.getCommandManager());
+        }
     }
     
     private JPopupMenu createContextMenu() {
         JPopupMenu popup = new JPopupMenu();
         ContextMenuHandler handler = new ContextMenuHandler();
         
+        // Edit menu items
         for (EEditMenuItem menuItem : EEditMenuItem.values()) {
             if (menuItem == EEditMenuItem.eCopy || 
                 menuItem == EEditMenuItem.eGroup || 
@@ -105,7 +117,19 @@ public class GDrawingPanel extends JPanel {
             }
             
             JMenuItem item = new JMenuItem(menuItem.getName());
-            item.setActionCommand(menuItem.name());
+            item.setActionCommand("EDIT_" + menuItem.name());
+            item.addActionListener(handler);
+            popup.add(item);
+        }
+        
+        popup.add(new JSeparator());
+        for (EShapeMenuItem menuItem : EShapeMenuItem.values()) {
+            if (menuItem == EShapeMenuItem.eStrokeWidth) {
+                popup.add(new JSeparator());
+            }
+            
+            JMenuItem item = new JMenuItem(menuItem.getName());
+            item.setActionCommand("SHAPE_" + menuItem.name());
             item.addActionListener(handler);
             popup.add(item);
         }
@@ -119,28 +143,39 @@ public class GDrawingPanel extends JPanel {
     }
     
     private void updateContextMenuState() {
+        if (editMenu == null && shapeMenu == null) return;
+        
         for (int i = 0; i < contextMenu.getComponentCount(); i++) {
             if (contextMenu.getComponent(i) instanceof JMenuItem) {
                 JMenuItem item = (JMenuItem) contextMenu.getComponent(i);
                 String command = item.getActionCommand();
                 
                 if (command != null) {
-                    EEditMenuItem menuType = EEditMenuItem.valueOf(command);
-                    item.setEnabled(isMenuItemEnabled(menuType));
+                    if (command.startsWith("EDIT_")) {
+                        String editCommand = command.substring(5); 
+                        EEditMenuItem menuType = EEditMenuItem.valueOf(editCommand);
+                        item.setEnabled(isEditMenuItemEnabled(menuType));
+                    } else if (command.startsWith("SHAPE_")) {
+                        String shapeCommand = command.substring(6);
+                        EShapeMenuItem menuType = EShapeMenuItem.valueOf(shapeCommand);
+                        item.setEnabled(isShapeMenuItemEnabled(menuType));
+                    }
                 }
             }
         }
     }
     
-    private boolean isMenuItemEnabled(EEditMenuItem menuType) {
+    private boolean isEditMenuItemEnabled(EEditMenuItem menuType) {
+        if (editMenu == null) return false;
+        
         switch (menuType) {
-            case eUndo: return canUndo();
-            case eRedo: return canRedo();
-            case eCopy: return canCopy();
-            case ePaste: return canPaste();
-            case eDelete: return canDelete();
-            case eGroup: return canGroup();
-            case eUngroup: return canUngroup();
+            case eUndo: return editMenu.canUndo();
+            case eRedo: return editMenu.canRedo();
+            case eCopy: return editMenu.canCopy();
+            case ePaste: return editMenu.canPaste();
+            case eDelete: return editMenu.canDelete();
+            case eGroup: return editMenu.canGroup();
+            case eUngroup: return editMenu.canUngroup();
             case eBringToFront:
             case eSendToBack:
             case eBringForward:
@@ -150,34 +185,28 @@ public class GDrawingPanel extends JPanel {
         }
     }
     
-    private class ContextMenuHandler implements ActionListener {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            EEditMenuItem menuItem = EEditMenuItem.valueOf(e.getActionCommand());
-            
-            switch (menuItem) {
-                case eUndo: undo(); break;
-                case eRedo: redo(); break;
-                case eCopy: copySelectedShapes(); break;
-                case ePaste: pasteShapes(); break;
-                case eDelete: deleteSelectedShapes(); break;
-                case eGroup: groupSelectedShapes(); break;
-                case eUngroup: ungroupSelectedShape(); break;
-                case eBringToFront: bringToFront(); break;
-                case eSendToBack: sendToBack(); break;
-                case eBringForward: bringForward(); break;
-                case eSendBackward: sendBackward(); break;
-            }
-        }
+    private boolean isShapeMenuItemEnabled(EShapeMenuItem menuType) {
+        if (shapeMenu == null) return false;
+        return shapeMenu.canApplyStyle();
     }
-    
+    // Getter/Setter methods - 데이터 접근만 제공
     public Vector<GShape> getShape() {
         return this.shapes;
     }
     
     public void setShapes(Vector<GShape> shapes) {
         this.shapes = shapes;
-        this.commandManager.clear();
+        if (this.editMenu != null) {
+            this.editMenu.getCommandManager().clear();
+        }
+    }
+    
+    public GShape getSelectedShape() {
+        return this.selectedShape;
+    }
+    
+    public void setSelectedShape(GShape selectedShape) {
+        this.selectedShape = selectedShape;
     }
     
     public void setEShapeTool(EShapeTool eShapeTool) {
@@ -192,108 +221,11 @@ public class GDrawingPanel extends JPanel {
         this.bUpdated = bUpdated;
     }
     
-    public void undo() {
-        if (commandManager.undo()) {
-            clearAllSelection();
-            setBUpdated(true);
-            repaint();
+    private void clearAllSelection() {
+        for (GShape shape : shapes) {
+            shape.setSelected(false);
         }
-    }
-    
-    public void redo() {
-        if (commandManager.redo()) {
-            clearAllSelection();
-            setBUpdated(true);
-            repaint();
-        }
-    }
-    
-    public boolean canUndo() {
-        return commandManager.canUndo();
-    }
-    
-    public boolean canRedo() {
-        return commandManager.canRedo();
-    }
-    
-    public void deleteSelectedShapes() {
-        Vector<GShape> selected = getSelectedShapes();
-        if (selected.isEmpty()) {
-            return;
-        }
-        
-        DeleteCommand deleteCommand = new DeleteCommand(shapes, selected);
-        commandManager.executeCommand(deleteCommand);
-        
-        clearAllSelection();
-        setBUpdated(true);
-        repaint();
-    }
-    
-    public void copySelectedShapes() {
-        Vector<GShape> selected = getSelectedShapes();
-        if (selected.isEmpty()) {
-            return;
-        }
-        
-        CopyCommand copyCommand = new CopyCommand(clipboard, selected);
-        copyCommand.execute();
-    }
-    
-    public void pasteShapes() {
-        if (clipboard.isEmpty()) {
-            return;
-        }
-        
-        PasteCommand pasteCommand = new PasteCommand(shapes, clipboard);
-        commandManager.executeCommand(pasteCommand);
-        
-        clearAllSelection();
-        setBUpdated(true);
-        repaint();
-    }
-    
-    public void groupSelectedShapes() {
-        Vector<GShape> selected = getSelectedShapes();
-        if (selected.size() < 2) {
-            return;
-        }
-        
-        GroupCommand groupCommand = new GroupCommand(shapes, selected, nextGroupId++);
-        commandManager.executeCommand(groupCommand);
-        setBUpdated(true);
-        repaint();
-    }
-    
-    public void ungroupSelectedShape() {
-        if (selectedShape == null || !selectedShape.isGrouped()) {
-            return;
-        }
-        
-        UngroupCommand ungroupCommand = new UngroupCommand(shapes, selectedShape.getGroupId());
-        commandManager.executeCommand(ungroupCommand);
-        setBUpdated(true);
-        repaint();
-    }
-    
-    public boolean canGroup() {
-        return getSelectedShapes().size() >= 2;
-    }
-    
-    public boolean canUngroup() {
-        return selectedShape != null && selectedShape.isGrouped();
-    }
-    
-    public boolean canDelete() {
-        return !getSelectedShapes().isEmpty();
-    }
-    
-    public boolean canCopy() {
-        return !getSelectedShapes().isEmpty();
-    }
-    
-    public boolean canPaste() {
-        return !clipboard.isEmpty();
+        selectedShape = null;
     }
     
     private void selectGroup(int groupId) {
@@ -304,113 +236,6 @@ public class GDrawingPanel extends JPanel {
                 selectedShape = shape;
             }
         }
-    }
-    
-    private Vector<GShape> getSelectedShapes() {
-        Vector<GShape> selected = new Vector<>();
-        for (GShape shape : shapes) {
-            if (shape.isSelected()) {
-                selected.add(shape);
-            }
-        }
-        return selected;
-    }
-    
-    public void bringToFront() {
-        if (selectedShape == null) {
-            return;
-        }
-        
-        if (selectedShape.isGrouped()) {
-            moveGroupToPosition(selectedShape.getGroupId(), shapes.size());
-        } else {
-            boolean removed = shapes.remove(selectedShape);
-            if (removed) {
-                shapes.add(selectedShape);
-            }
-        }
-        
-        setBUpdated(true);
-        repaint();
-    }
-    
-    public void sendToBack() {
-        if (selectedShape == null) {
-            return;
-        }
-        
-        if (selectedShape.isGrouped()) {
-            moveGroupToPosition(selectedShape.getGroupId(), 0);
-        } else {
-            boolean removed = shapes.remove(selectedShape);
-            if (removed) {
-                shapes.add(0, selectedShape);
-            }
-        }
-        
-        setBUpdated(true);
-        repaint();
-    }
-    
-    public void bringForward() {
-        if (selectedShape == null) return;
-        
-        int currentIndex = shapes.indexOf(selectedShape);
-        if (currentIndex == -1 || currentIndex >= shapes.size() - 1) return;
-        
-        shapes.remove(currentIndex);
-        shapes.add(currentIndex + 1, selectedShape);
-        setBUpdated(true);
-        repaint();
-    }
-    
-    public void sendBackward() {
-        if (selectedShape == null) return;
-        
-        int currentIndex = shapes.indexOf(selectedShape);
-        if (currentIndex == -1 || currentIndex <= 0) return;
-        
-        shapes.remove(currentIndex);
-        shapes.add(currentIndex - 1, selectedShape);
-        setBUpdated(true);
-        repaint();
-    }
-    
-    private void moveGroupToPosition(int groupId, int position) {
-        Vector<GShape> groupShapes = new Vector<>();
-        
-        for (int i = shapes.size() - 1; i >= 0; i--) {
-            if (shapes.get(i).getGroupId() == groupId) {
-                groupShapes.add(0, shapes.remove(i));
-            }
-        }
-        
-        for (int i = 0; i < groupShapes.size(); i++) {
-            shapes.add(Math.min(position + i, shapes.size()), groupShapes.get(i));
-        }
-    }
-    
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        for (GShape shape : shapes) {
-            shape.draw((Graphics2D) g);
-        }
-    }
-    
-    private GShape onShape(int x, int y) {
-        for (int i = shapes.size() - 1; i >= 0; i--) {
-            if (shapes.get(i).contains(x, y)) {
-                return shapes.get(i);
-            }
-        }
-        return null;
-    }
-    
-    private void clearAllSelection() {
-        for (GShape shape : shapes) {
-            shape.setSelected(false);
-        }
-        selectedShape = null;
     }
     
     private void selectShapeOrGroup(GShape clickedShape, boolean isMultiSelect) {
@@ -430,6 +255,23 @@ public class GDrawingPanel extends JPanel {
         }
     }
     
+    //transform
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        for (GShape shape : shapes) {
+            shape.draw((Graphics2D) g);
+        }
+    }
+    
+    private GShape onShape(int x, int y) {
+        for (int i = shapes.size() - 1; i >= 0; i--) {
+            if (shapes.get(i).contains(x, y)) {
+                return shapes.get(i);
+            }
+        }
+        return null;
+    }
+    
     private void startTransform(int x, int y, boolean isMultiSelect) {
         if (eShapeTool == EShapeTool.eSelect) {
             GShape clickedShape = onShape(x, y);
@@ -440,7 +282,9 @@ public class GDrawingPanel extends JPanel {
                     currentShape = new GRectangle();
                     transformer = new GDrawer(currentShape);
                     transformer.setAllShapes(shapes);
-                    transformer.setCommandManager(commandManager);
+                    if (editMenu != null) {
+                        transformer.setCommandManager(editMenu.getCommandManager());
+                    }
                     transformer.start((Graphics2D) getGraphics(), x, y);
                 }
             } else {
@@ -457,7 +301,9 @@ public class GDrawingPanel extends JPanel {
                     }
                     
                     transformer.setAllShapes(shapes);
-                    transformer.setCommandManager(commandManager);
+                    if (editMenu != null) {
+                        transformer.setCommandManager(editMenu.getCommandManager());
+                    }
                     transformer.start((Graphics2D) getGraphics(), x, y);
                 }
             }
@@ -465,7 +311,9 @@ public class GDrawingPanel extends JPanel {
             currentShape = eShapeTool.newShape();
             transformer = new GDrawer(currentShape);
             transformer.setAllShapes(shapes);
-            transformer.setCommandManager(commandManager);
+            if (editMenu != null) {
+                transformer.setCommandManager(editMenu.getCommandManager());
+            }
             transformer.start((Graphics2D) getGraphics(), x, y);
         }
     }
@@ -524,32 +372,74 @@ public class GDrawingPanel extends JPanel {
         }
     }
     
+    private class ContextMenuHandler implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            String command = e.getActionCommand();
+            
+            if (command.startsWith("EDIT_")) {
+                if (editMenu == null) return;
+                
+                String editCommand = command.substring(5);
+                EEditMenuItem menuItem = EEditMenuItem.valueOf(editCommand);
+                
+                switch (menuItem) {
+                    case eUndo: editMenu.undo(); break;
+                    case eRedo: editMenu.redo(); break;
+                    case eCopy: editMenu.copySelectedShapes(); break;
+                    case ePaste: editMenu.pasteShapes(); break;
+                    case eDelete: editMenu.deleteSelectedShapes(); break;
+                    case eGroup: editMenu.group(); break;
+                    case eUngroup: editMenu.ungroup(); break;
+                    case eBringToFront: editMenu.bringToFront(); break;
+                    case eSendToBack: editMenu.sendToBack(); break;
+                    case eBringForward: editMenu.bringForward(); break;
+                    case eSendBackward: editMenu.sendBackward(); break;
+                }
+            } else if (command.startsWith("SHAPE_")) {
+                if (shapeMenu == null) return;
+                
+                String shapeCommand = command.substring(6); // Remove "SHAPE_" prefix
+                EShapeMenuItem menuItem = EShapeMenuItem.valueOf(shapeCommand);
+                
+                switch (menuItem) {
+                    case eStrokeColor: shapeMenu.setStrokeColor(); break;
+                    case eFillColor: shapeMenu.setFillColor(); break;
+                    case eStrokeWidth: shapeMenu.setStrokeWidth(); break;
+                    case eStrokeStyle: shapeMenu.setStrokeStyle(); break;
+                }
+            }
+        }
+    }
+    
     private class KeyHandler implements KeyListener {
         @Override
         public void keyPressed(KeyEvent e) {
+            if (editMenu == null) return;
+            
             switch (e.getKeyCode()) {
                 case KeyEvent.VK_DELETE:
                 case KeyEvent.VK_BACK_SPACE:
-                    deleteSelectedShapes();
+                    editMenu.deleteSelectedShapes();
                     break;
                 case KeyEvent.VK_C:
                     if (e.isControlDown()) {
-                        copySelectedShapes();
+                        editMenu.copySelectedShapes();
                     }
                     break;
                 case KeyEvent.VK_V:
                     if (e.isControlDown()) {
-                        pasteShapes();
+                        editMenu.pasteShapes();
                     }
                     break;
                 case KeyEvent.VK_Z:
                     if (e.isControlDown()) {
-                        undo();
+                        editMenu.undo();
                     }
                     break;
                 case KeyEvent.VK_Y:
                     if (e.isControlDown()) {
-                        redo();
+                        editMenu.redo();
                     }
                     break;
             }

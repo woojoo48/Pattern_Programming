@@ -1,10 +1,12 @@
 package shapes;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
+import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
@@ -18,6 +20,43 @@ public abstract class GShape implements Serializable{
 	public enum EPoints{
 		e2P,
 		eNP
+	}
+	
+	public enum EStrokeStyle {
+		SOLID("SOLID"),
+		DASHED("DASHED"),
+		DOTTED("DOTTED");
+		
+		private String name;
+		
+		private EStrokeStyle(String name) {
+			this.name = name;
+		}
+		
+		public String getDisplayName() {
+			return GConstants.getStrokeStyleLabel(this.name);
+		}
+		
+		public Stroke createStroke(float width) {
+			switch (this) {
+				case DASHED:
+					return new BasicStroke(width, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 0, new float[]{10}, 0);
+				case DOTTED:
+					return new BasicStroke(width, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 0, new float[]{3}, 0);
+				case SOLID:
+				default:
+					return new BasicStroke(width);
+			}
+		}
+		
+		public static EStrokeStyle fromString(String styleString) {
+			for (EStrokeStyle style : values()) {
+				if (style.name.equals(styleString)) {
+					return style;
+				}
+			}
+			return SOLID;
+		}
 	}
 	
 	public enum EAnchor{
@@ -49,6 +88,11 @@ public abstract class GShape implements Serializable{
 	private AffineTransform affineTransform;
 	private int groupId = -1;
 	
+	private Color strokeColor;
+	private Color fillColor;
+	private float strokeWidth;
+	private EStrokeStyle strokeStyle;
+	
 	public GShape(Shape shape) {
 		this.shape = shape;
 		this.affineTransform = new AffineTransform();
@@ -60,6 +104,43 @@ public abstract class GShape implements Serializable{
 		
 		this.bSelected = false;
 		this.eSelectedAnchor = null;
+		
+		this.strokeColor = GConstants.getDefaultStrokeColor();
+		this.fillColor = GConstants.getDefaultFillColor();
+		this.strokeWidth = GConstants.getDefaultStrokeWidth();
+		this.strokeStyle = EStrokeStyle.fromString(GConstants.getDefaultStrokeStyle());
+	}
+	
+	public Color getStrokeColor() {
+		return this.strokeColor;
+	}
+	
+	public void setStrokeColor(Color strokeColor) {
+		this.strokeColor = strokeColor;
+	}
+	
+	public Color getFillColor() {
+		return this.fillColor;
+	}
+	
+	public void setFillColor(Color fillColor) {
+		this.fillColor = fillColor;
+	}
+	
+	public float getStrokeWidth() {
+		return this.strokeWidth;
+	}
+	
+	public void setStrokeWidth(float strokeWidth) {
+		this.strokeWidth = strokeWidth;
+	}
+	
+	public EStrokeStyle getStrokeStyle() {
+		return this.strokeStyle;
+	}
+	
+	public void setStrokeStyle(EStrokeStyle strokeStyle) {
+		this.strokeStyle = strokeStyle;
 	}
 	
 	public AffineTransform getAffineTransform() {
@@ -108,6 +189,11 @@ public abstract class GShape implements Serializable{
 		target.affineTransform = (AffineTransform) this.affineTransform.clone();
 		target.groupId = this.groupId;
 		target.bSelected = false;
+		// Copy style properties
+		target.strokeColor = this.strokeColor;
+		target.fillColor = this.fillColor;
+		target.strokeWidth = this.strokeWidth;
+		target.strokeStyle = this.strokeStyle;
 	}
 	
 	private void setAnchors() {
@@ -144,7 +230,25 @@ public abstract class GShape implements Serializable{
 
 	public void draw(Graphics2D graphics2D) {
 		Shape transformedShape = this.affineTransform.createTransformedShape(shape);
+		
+		// Set stroke style and color
+		Stroke originalStroke = graphics2D.getStroke();
+		Color originalColor = graphics2D.getColor();
+		
+		// Fill the shape first
+		if (fillColor != null) {
+			graphics2D.setColor(fillColor);
+			graphics2D.fill(transformedShape);
+		}
+		
+		// Draw the outline
+		graphics2D.setColor(strokeColor);
+		graphics2D.setStroke(strokeStyle.createStroke(strokeWidth));
 		graphics2D.draw(transformedShape);
+		
+		// Restore original graphics settings
+		graphics2D.setStroke(originalStroke);
+		graphics2D.setColor(originalColor);
 		
 		if(bSelected) {
 		    this.setAnchors();
